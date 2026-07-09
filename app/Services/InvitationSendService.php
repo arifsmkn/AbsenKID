@@ -156,11 +156,17 @@ class InvitationSendService
         $waktu    = $event?->waktu_mulai ? substr($event->waktu_mulai, 0, 5) . ' WIB' : '-';
         $nama     = $event?->nama ?? 'Konvensi Improvement Dharma';
         $peserta  = $employee->nama ?? '-';
-        $logoUrl  = $event?->logo ? $siteUrl . '/storage/' . $event->logo : null;
+        $logoUrl      = $event?->logo ? $siteUrl . '/storage/' . $event->logo : null;
+        $wallpaperUrl = $event?->wallpaper ? $siteUrl . '/storage/' . $event->wallpaper : null;
 
         $logoHtml = $logoUrl
             ? "<img src=\"{$logoUrl}\" alt=\"{$nama}\" width=\"140\" height=\"79\" style=\"width:140px;height:auto;max-width:140px;display:block;margin:0 auto 14px;\">"
             : "<div style=\"font-size:28px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:8px;\">KID 31</div>";
+
+        $bgAttr  = $wallpaperUrl ? "background=\"{$wallpaperUrl}\"" : '';
+        $bgStyle = $wallpaperUrl
+            ? "background-image:url('{$wallpaperUrl}');background-size:cover;background-position:center top;background-color:#1b3d26;"
+            : "background-color:#1b3d26;";
 
         return <<<HTML
 <!DOCTYPE html>
@@ -169,23 +175,29 @@ class InvitationSendService
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>
-<body style="margin:0;padding:0;background:#f0f4f0;font-family:'Segoe UI',Arial,sans-serif;color:#1a2e40;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f0;padding:32px 8px;">
+<body style="margin:0;padding:0;background:#e8edf0;font-family:'Segoe UI',Arial,sans-serif;color:#1a2e40;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#e8edf0;padding:32px 8px;">
 <tr><td align="center">
 <table width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
 
-  <!-- HEADER -->
-  <tr><td bgcolor="#1e6b3e" style="background:linear-gradient(160deg,#1b3d26 0%,#25563a 60%,#1e6b3e 100%);border-radius:20px 20px 0 0;padding:36px 32px 28px;text-align:center;">
-    {$logoHtml}
-    <div style="color:#a8f0c0;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">Undangan Resmi</div>
-    <div style="color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;margin-bottom:4px;">{$nama}</div>
-    <div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:5px 18px;">
-      <span style="color:#ffffff;font-size:12px;font-weight:600;">🌟 GROWTH WITH PASSION 🌟</span>
-    </div>
+  <!-- HEADER dengan wallpaper background -->
+  <tr><td bgcolor="#1b3d26" {$bgAttr} style="{$bgStyle}border-radius:20px 20px 0 0;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="background:rgba(10,28,16,0.68);border-radius:20px 20px 0 0;padding:36px 32px 28px;text-align:center;">
+        {$logoHtml}
+        <div style="color:#a8f0c0;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">Undangan Resmi</div>
+        <div style="color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;margin-bottom:4px;">{$nama}</div>
+        <table cellpadding="0" cellspacing="0" style="margin:10px auto 0;">
+          <tr><td style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:5px 18px;">
+            <span style="color:#ffffff;font-size:12px;font-weight:600;">🌟 GROWTH WITH PASSION 🌟</span>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
   </td></tr>
 
   <!-- DIVIDER -->
-  <tr><td bgcolor="#25563a" style="background:#25563a;height:8px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
+  <tr><td bgcolor="#1b3d26" style="background:#1b3d26;height:6px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
 
   <!-- BODY -->
   <tr><td style="background:#ffffff;padding:8px 32px 0;">
@@ -265,7 +277,13 @@ class InvitationSendService
     <!-- CTA BUTTON -->
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 8px;">
       <tr><td align="center">
-        <a href="{$qrUrl}" style="display:inline-block;background:linear-gradient(135deg,#1b3d26,#25563a);color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:50px;letter-spacing:.3px;">🎫 Konfirmasi Kehadiran</a>
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td bgcolor="#1b3d26" style="background:#1b3d26;border-radius:50px;mso-padding-alt:0;">
+              <a href="{$qrUrl}" style="display:block;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:50px;font-family:'Segoe UI',Arial,sans-serif;">🎫 Lihat &amp; Download QR Undangan</a>
+            </td>
+          </tr>
+        </table>
       </td></tr>
     </table>
 
