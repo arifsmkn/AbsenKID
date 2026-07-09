@@ -151,7 +151,7 @@ class InvitationSendService
         $event    = $invitation->event;
         $employee = $invitation->employee;
         $siteUrl  = Setting::get('site_url', url('/'));
-        $qrUrl    = $siteUrl;
+        $qrUrl    = rtrim($siteUrl, '/') . '/peserta/login';
         $tanggal  = $event?->tanggal?->isoFormat('dddd, D MMMM Y') ?? '-';
         $waktu    = $event?->waktu_mulai ? substr($event->waktu_mulai, 0, 5) . ' WIB' : '-';
         $nama     = $event?->nama ?? 'Konvensi Improvement Dharma';
