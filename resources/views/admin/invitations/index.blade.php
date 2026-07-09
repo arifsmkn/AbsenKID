@@ -58,6 +58,11 @@
                 <input type="hidden" name="channel" value="both">
                 <button class="btn-secondary">📤 Kirim WA + Email</button>
             </form>
+            {{-- Test Kirim --}}
+            <button type="button" onclick="document.getElementById('modalTest').classList.remove('hidden')"
+                    class="btn-secondary" style="border-color:#7c3aed;color:#7c3aed;">
+                🧪 Test Kirim Sendiri
+            </button>
         </div>
         <p class="text-xs text-brand-slate mt-2">Hanya dikirim ke peserta yang belum berhasil menerima. Pastikan WA/Email diaktifkan di <a href="{{ route('admin.settings.index') }}" class="text-brand-navy underline">Pengaturan</a>.</p>
     </div>
@@ -217,14 +222,41 @@
                             <a href="{{ route('admin.invitations.qr', $inv) }}" target="_blank"
                                class="text-xs px-2 py-1 rounded text-brand-navy border border-brand-slate/30 hover:bg-brand-cream transition">QR</a>
                             @if(auth()->user()->hasRole('admin'))
-                            <form method="POST" action="{{ route('admin.invitations.sendOne', $inv) }}">
-                                @csrf
-                                <button class="text-xs px-2 py-1 rounded text-white transition"
-                                        style="background:#244C6B"
-                                        onclick="return confirm('Kirim undangan ke {{ addslashes($inv->employee->nama) }}?')">
-                                    📤 Kirim
+                            <div x-data="{open:false}" class="relative">
+                                <button @click="open=!open" @click.outside="open=false"
+                                        class="text-xs px-2 py-1 rounded text-white transition flex items-center gap-1"
+                                        style="background:#244C6B">
+                                    📤 Kirim <span class="text-[10px]">▾</span>
                                 </button>
-                            </form>
+                                <div x-show="open" x-transition
+                                     class="absolute right-0 z-50 mt-1 w-36 rounded-lg shadow-lg border border-brand-slate/20 overflow-hidden"
+                                     style="background:var(--color-card,#fff)">
+                                    <form method="POST" action="{{ route('admin.invitations.sendOne', $inv) }}">
+                                        @csrf
+                                        <input type="hidden" name="channel" value="both">
+                                        <button class="w-full text-left text-xs px-3 py-2 hover:bg-brand-cream/50 transition"
+                                                onclick="return confirm('Kirim WA + Email ke {{ addslashes($inv->employee->nama) }}?')">
+                                            📤 WA + Email
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.invitations.sendOne', $inv) }}">
+                                        @csrf
+                                        <input type="hidden" name="channel" value="wa">
+                                        <button class="w-full text-left text-xs px-3 py-2 hover:bg-brand-cream/50 transition"
+                                                onclick="return confirm('Kirim WA ke {{ addslashes($inv->employee->nama) }}?')">
+                                            💬 WA Saja
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.invitations.sendOne', $inv) }}">
+                                        @csrf
+                                        <input type="hidden" name="channel" value="email">
+                                        <button class="w-full text-left text-xs px-3 py-2 hover:bg-brand-cream/50 transition"
+                                                onclick="return confirm('Kirim Email ke {{ addslashes($inv->employee->nama) }}?')">
+                                            📧 Email Saja
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                             @endif
                         </div>
                     </td>
@@ -240,5 +272,46 @@
         </table>
     </div>
     <div class="p-4 border-t border-brand-slate/10">{{ $invitations->links() }}</div>
+</div>
+
+{{-- Modal Test Kirim Sendiri --}}
+<div id="modalTest" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+    <div class="card w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-brand-navy dark:text-white text-lg">🧪 Test Kirim Undangan</h3>
+            <button onclick="document.getElementById('modalTest').classList.add('hidden')"
+                    class="text-brand-slate hover:text-brand-red text-xl leading-none">×</button>
+        </div>
+        <p class="text-xs text-brand-slate mb-4">Kirim contoh undangan ke kontak Anda sendiri untuk memastikan tampilan sudah benar. Menggunakan data undangan pertama sebagai template.</p>
+        <form method="POST" action="{{ route('admin.invitations.sendTest') }}" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-semibold mb-1">Channel</label>
+                <select name="channel" class="w-full border rounded px-3 py-2 text-sm" style="border-color:rgba(36,76,107,0.3)">
+                    <option value="both">📤 WA + Email</option>
+                    <option value="wa">💬 WA Saja</option>
+                    <option value="email">📧 Email Saja</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">Email Tujuan</label>
+                <input type="email" name="email" value="{{ auth()->user()->email }}"
+                       placeholder="email@domain.com"
+                       class="w-full border rounded px-3 py-2 text-sm" style="border-color:rgba(36,76,107,0.3)">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">Nomor WA Tujuan</label>
+                <input type="text" name="phone" placeholder="08xxxxxxxxxx"
+                       class="w-full border rounded px-3 py-2 text-sm" style="border-color:rgba(36,76,107,0.3)">
+            </div>
+            <div class="flex gap-2 justify-end pt-2">
+                <button type="button" onclick="document.getElementById('modalTest').classList.add('hidden')"
+                        class="btn-secondary text-sm">Batal</button>
+                <button type="submit" class="btn-primary text-sm" style="background:#7c3aed">
+                    🧪 Kirim Test
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

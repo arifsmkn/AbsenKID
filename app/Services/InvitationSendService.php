@@ -303,6 +303,44 @@ class InvitationSendService
 HTML;
     }
 
+    public function sendTestEmail(Invitation $invitation, string $toEmail): bool
+    {
+        try {
+            Mail::send([], [], function ($mail) use ($invitation, $toEmail) {
+                $employee = $invitation->employee;
+                $event    = $invitation->event;
+                $mail->to($toEmail)
+                     ->subject('[TEST] Undangan ' . ($event?->nama ?? 'Konvensi Improvement Dharma'))
+                     ->html($this->buildEmailHtml($invitation));
+            });
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Test email error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function sendTestWa(Invitation $invitation, string $toPhone): bool
+    {
+        $token  = Setting::get('wa_api_token', '');
+        $apiUrl = Setting::get('wa_api_url', 'https://api.fonnte.com/send');
+        $phone  = preg_replace('/[^0-9]/', '', $toPhone);
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        }
+        $message = '[TEST] ' . $this->buildMessage($invitation);
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders(['Authorization' => $token])
+                ->post($apiUrl, ['target' => $phone, 'message' => $message]);
+            $body = $response->json();
+            return $response->successful() && ($body['status'] ?? false);
+        } catch (\Throwable $e) {
+            Log::error('Test WA error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     private function logSend(Invitation $inv, string $channel, string $target, string $status, ?string $error = null): void
     {
         InvitationSend::updateOrCreate(

@@ -170,24 +170,72 @@ class InvitationController extends Controller
             ->with('success', count($rows) . " peserta yang belum konfirmasi di {$scope} berhasil ditandai \"{$label}\". Peserta yang sudah pernah konfirmasi tidak diubah.");
     }
 
-    /** Kirim undangan satu peserta */
+    /** Kirim undangan satu peserta (support channel: wa/email/both) */
     public function sendOne(Request $request, Invitation $invitation)
     {
         $invitation->load('employee', 'event');
-        $result = $this->sender->sendOne($invitation);
+        $channel = $request->input('channel', 'both');
 
+        if ($channel === 'wa') {
+            $ok  = $this->sender->sendWhatsApp($invitation);
+            $msg = $ok ? 'WA terkirim' : 'WA gagal';
+            return back()->with($ok ? 'success' : 'error', "{$invitation->employee->nama}: {$msg}");
+        }
+
+        if ($channel === 'email') {
+            $ok  = $this->sender->sendEmail($invitation);
+            $msg = $ok ? 'Email terkirim' : 'Email gagal';
+            return back()->with($ok ? 'success' : 'error', "{$invitation->employee->nama}: {$msg}");
+        }
+
+        $result = $this->sender->sendOne($invitation);
         $msgs = [];
         if ($result['wa'] === true)    $msgs[] = 'WA terkirim';
         if ($result['wa'] === false)   $msgs[] = 'WA gagal';
         if ($result['email'] === true) $msgs[] = 'Email terkirim';
         if ($result['email'] === false) $msgs[] = 'Email gagal';
 
-        $msg = $msgs ? implode(', ', $msgs) : 'Tidak ada channel aktif. Aktifkan di Pengaturan.';
+        $msg = $msgs ? implode(', ', $msgs) : 'Tidak ada channel aktif.';
+        return back()->with(in_array(true, $result, true) ? 'success' : 'error',
+            "{$invitation->employee->nama}: {$msg}");
+    }
 
-        if (in_array(true, $result, true)) {
-            return back()->with('success', "Undangan {$invitation->employee->nama}: {$msg}");
+    /** Kirim test ke email/WA admin sendiri */
+    public function sendTest(Request $request)
+    {
+        $request->validate([
+            'channel' => 'required|in:wa,email,both',
+            'email'   => 'nullable|email',
+            'phone'   => 'nullable|string|max:20',
+        ]);
+
+        $event = Event::where('is_active', true)->firstOrFail();
+        $invitation = Invitation::with(['employee', 'event'])
+            ->where('event_id', $event->id)->first();
+
+        if (!$invitation) {
+            return back()->with('error', 'Belum ada undangan. Generate dulu.');
         }
-        return back()->with('error', "Undangan {$invitation->employee->nama}: {$msg}");
+
+        $channel = $request->channel;
+        $results = [];
+
+        if (in_array($channel, ['email', 'both']) && $request->email) {
+            $ok = $this->sender->sendTestEmail($invitation, $request->email);
+            $results[] = $ok ? "Email ke {$request->email}: terkirim" : "Email ke {$request->email}: gagal";
+        }
+
+        if (in_array($channel, ['wa', 'both']) && $request->phone) {
+            $ok = $this->sender->sendTestWa($invitation, $request->phone);
+            $results[] = $ok ? "WA ke {$request->phone}: terkirim" : "WA ke {$request->phone}: gagal";
+        }
+
+        if (empty($results)) {
+            return back()->with('error', 'Masukkan email atau nomor WA tujuan test.');
+        }
+
+        $allOk = !str_contains(implode(' ', $results), 'gagal');
+        return back()->with($allOk ? 'success' : 'error', '🧪 Test: ' . implode(' | ', $results));
     }
 
     /** Kirim semua undangan yang belum terkirim (background-friendly) */

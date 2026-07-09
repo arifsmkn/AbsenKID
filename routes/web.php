@@ -94,6 +94,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,user'])-
     Route::get('invitations/{invitation}/qr', [InvitationController::class, 'showQr'])->name('invitations.qr');
     Route::post('invitations/{invitation}/send', [InvitationController::class, 'sendOne'])->name('invitations.sendOne')->middleware('role:admin');
     Route::post('invitations/send-all', [InvitationController::class, 'sendAll'])->name('invitations.sendAll')->middleware('role:admin');
+    Route::post('invitations/send-test', [InvitationController::class, 'sendTest'])->name('invitations.sendTest')->middleware('role:admin');
     Route::post('invitations/confirm-all', [InvitationController::class, 'confirmAll'])->name('invitations.confirmAll')->middleware('role:admin');
     Route::get('invitations/send-history', [InvitationController::class, 'sendHistory'])->name('invitations.sendHistory');
 
