@@ -183,7 +183,11 @@ $typeMeta = [
                             <button type="button"
                                     @click="multiDecrement({{ $dp->id }}, @js($dp->nama_hadiah), '{{ $dp->gambar_url }}', '{{ $dp->type }}')"
                                     class="w-6 h-6 rounded font-bold text-sm leading-none" style="background:rgba(123,145,161,0.15); color:#7B91A1">−</button>
-                            <span class="w-5 text-center font-black text-sm" x-text="multiQty({{ $dp->id }})"></span>
+                            <input type="number" min="0" max="50"
+                                   :value="multiQty({{ $dp->id }})"
+                                   @change="multiSetQty({{ $dp->id }}, @js($dp->nama_hadiah), '{{ $dp->gambar_url }}', '{{ $dp->type }}', $event.target.value)"
+                                   class="w-10 text-center font-black text-sm rounded border px-1 py-0.5"
+                                   style="background:rgba(36,76,107,0.12);border-color:rgba(36,76,107,0.3);color:inherit">
                             <button type="button"
                                     @click="multiIncrement({{ $dp->id }}, @js($dp->nama_hadiah), '{{ $dp->gambar_url }}', '{{ $dp->type }}')"
                                     :disabled="multiTotalSlots() >= 50"
@@ -859,6 +863,14 @@ function spinApp() {
             if (!this.multiConfig[id]) return;
             this.multiConfig[id].qty--;
             if (this.multiConfig[id].qty <= 0) delete this.multiConfig[id];
+        },
+        multiSetQty(id, nama, gambar, type, val) {
+            const qty = Math.max(0, Math.min(50, parseInt(val) || 0));
+            const remaining = 50 - this.multiTotalSlots() + (this.multiConfig[id]?.qty ?? 0);
+            const clamped = Math.min(qty, remaining);
+            if (clamped <= 0) { delete this.multiConfig[id]; return; }
+            if (!this.multiConfig[id]) this.multiConfig[id] = { id, nama, gambar, type, qty: 0 };
+            this.multiConfig[id].qty = clamped;
         },
         multiClearConfig() { this.multiConfig = {}; this.multiBanner = ''; this.multiExcludedJabatan = []; },
 

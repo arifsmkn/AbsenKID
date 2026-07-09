@@ -73,14 +73,20 @@
         /* ── Multi-Spin grid ── */
         .multi-grid {
             display: grid;
-            gap: 10px;
-            align-content: start;
+            gap: clamp(6px, 1vw, 14px);
+            align-content: center;
+            align-items: stretch;
+            height: 100%;
         }
         .multi-slot {
             background: #05111b;
             border: 2px solid rgba(36,76,107,0.5);
-            min-height: 110px;
+            min-height: clamp(80px, 18vh, 160px);
             transition: border-color 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .multi-slot-spinning { border-color: rgba(167,139,250,0.6); background: rgba(124,58,237,0.06); }
         .multi-slot-winner   { border-color: rgba(34,197,94,0.6); background: rgba(34,197,94,0.06); }
@@ -439,11 +445,15 @@ function displayApp() {
 
         multiCols() {
             const n = this.multiSlots.length;
-            if (n <= 4)  return n || 1;
-            if (n <= 12) return Math.ceil(n / 2);
-            if (n <= 24) return Math.ceil(n / 3);
-            if (n <= 40) return Math.ceil(n / 4);
-            return Math.ceil(n / 5);
+            if (n <= 2)  return n || 1;
+            if (n <= 4)  return 2;
+            if (n <= 6)  return 3;
+            if (n <= 9)  return 3;
+            if (n <= 12) return 4;
+            if (n <= 20) return 5;
+            if (n <= 30) return 6;
+            if (n <= 42) return 7;
+            return 8;
         },
         multiDrumNpk(slot) {
             if (!this.samplePool.length) return '------';

@@ -159,7 +159,7 @@ class InvitationSendService
         $logoUrl  = $event?->logo ? $siteUrl . '/storage/' . $event->logo : null;
 
         $logoHtml = $logoUrl
-            ? "<img src=\"{$logoUrl}\" alt=\"{$nama}\" style=\"height:72px;max-width:220px;object-fit:contain;display:block;margin:0 auto 14px;\">"
+            ? "<img src=\"{$logoUrl}\" alt=\"{$nama}\" width=\"140\" height=\"79\" style=\"width:140px;height:auto;max-width:140px;display:block;margin:0 auto 14px;\">"
             : "<div style=\"font-size:28px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:8px;\">KID 31</div>";
 
         return <<<HTML
