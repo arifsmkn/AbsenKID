@@ -185,11 +185,11 @@ class InvitationSendService
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr><td style="background:rgba(10,28,16,0.68);border-radius:20px 20px 0 0;padding:36px 32px 28px;text-align:center;">
         {$logoHtml}
-        <div style="color:#a8f0c0;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">Undangan Resmi</div>
+        <div style="color:#a8f0c0;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;"></div>
         <div style="color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;margin-bottom:4px;">{$nama}</div>
         <table cellpadding="0" cellspacing="0" style="margin:10px auto 0;">
           <tr><td style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:5px 18px;">
-            <span style="color:#ffffff;font-size:12px;font-weight:600;"> MONOZUKURI S.P.I.R.I.T </span>
+            <span style="color:#ffffff;font-size:16px;font-weight:600;letter-spacing:2px;"> MONOZUKURI S.P.I.R.I.T </span>
           </td></tr>
         </table>
       </td></tr>
