@@ -189,7 +189,7 @@ class InvitationSendService
         <div style="color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;margin-bottom:4px;">{$nama}</div>
         <table cellpadding="0" cellspacing="0" style="margin:10px auto 0;">
           <tr><td style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:5px 18px;">
-            <span style="color:#ffffff;font-size:12px;font-weight:600;">🌟 GROWTH WITH PASSION 🌟</span>
+            <span style="color:#ffffff;font-size:12px;font-weight:600;"> MONOZUKURI S.P.I.R.I.T </span>
           </td></tr>
         </table>
       </td></tr>
@@ -280,7 +280,7 @@ class InvitationSendService
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td bgcolor="#1b3d26" style="background:#1b3d26;border-radius:50px;mso-padding-alt:0;">
-              <a href="{$qrUrl}" style="display:block;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:50px;font-family:'Segoe UI',Arial,sans-serif;">🎫 Lihat &amp; Download QR Undangan</a>
+              <a href="{$qrUrl}" style="display:block;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:50px;font-family:'Segoe UI',Arial,sans-serif;"> Download QR Undangan</a>
             </td>
           </tr>
         </table>
