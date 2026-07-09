@@ -150,11 +150,17 @@ class InvitationSendService
     {
         $event    = $invitation->event;
         $employee = $invitation->employee;
-        $qrUrl    = Setting::get('site_url', route('peserta.login'));
+        $siteUrl  = Setting::get('site_url', url('/'));
+        $qrUrl    = $siteUrl;
         $tanggal  = $event?->tanggal?->isoFormat('dddd, D MMMM Y') ?? '-';
         $waktu    = $event?->waktu_mulai ? substr($event->waktu_mulai, 0, 5) . ' WIB' : '-';
         $nama     = $event?->nama ?? 'Konvensi Improvement Dharma';
         $peserta  = $employee->nama ?? '-';
+        $logoUrl  = $event?->logo ? $siteUrl . '/storage/' . $event->logo : null;
+
+        $logoHtml = $logoUrl
+            ? "<img src=\"{$logoUrl}\" alt=\"{$nama}\" style=\"height:72px;max-width:220px;object-fit:contain;display:block;margin:0 auto 14px;\">"
+            : "<div style=\"font-size:28px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:8px;\">KID 31</div>";
 
         return <<<HTML
 <!DOCTYPE html>
@@ -162,78 +168,120 @@ class InvitationSendService
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<style>
-  body { font-family:'Segoe UI',Arial,sans-serif; background:#f4f7fb; margin:0; padding:24px 8px; color:#1a2e40; }
-  .wrap { max-width:540px; margin:0 auto; }
-  .card { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 4px 28px rgba(36,76,107,0.13); }
-  .top-bar { height:6px; background:linear-gradient(90deg,#25563a,#2352fb,#D03F42); }
-  .header { background:linear-gradient(135deg,#1a3a28 0%,#25563a 100%); padding:36px 28px 28px; text-align:center; color:#fff; }
-  .flower { font-size:28px; letter-spacing:4px; display:block; margin-bottom:10px; }
-  .header h1 { margin:0 0 6px; font-size:21px; font-weight:800; letter-spacing:.3px; line-height:1.3; }
-  .header p { margin:0; opacity:.7; font-size:12px; letter-spacing:1px; text-transform:uppercase; }
-  .body { padding:30px 28px 8px; }
-  .greeting { font-size:16px; font-weight:700; color:#25563a; margin:0 0 6px; }
-  .intro { font-size:14px; color:#4a5568; margin:0 0 20px; line-height:1.6; }
-  .info-box { background:#f8fffe; border:1.5px solid #d1fae5; border-radius:12px; padding:18px 20px; margin:0 0 20px; }
-  .info-row { display:flex; align-items:flex-start; gap:10px; margin:8px 0; font-size:14px; }
-  .info-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
-  .info-label { color:#6b7280; font-size:12px; }
-  .info-value { color:#1a2e40; font-weight:600; line-height:1.4; }
-  .info-sep { border:none; border-top:1px solid #d1fae5; margin:12px 0; }
-  .btn-wrap { text-align:center; margin:20px 0 24px; }
-  .btn { display:inline-block; padding:13px 36px; background:linear-gradient(135deg,#25563a,#2d7a49); color:#fff !important; text-decoration:none; border-radius:50px; font-weight:700; font-size:15px; letter-spacing:.3px; }
-  .note { font-size:12px; color:#9ca3af; text-align:center; margin:0 0 24px; }
-  .footer { text-align:center; padding:16px 20px; color:#9ca3af; font-size:11px; border-top:1px solid #f0f4f8; }
-</style>
 </head>
-<body>
-<div class="wrap">
-<div class="card">
-  <div class="top-bar"></div>
-  <div class="header">
-    <span class="flower">🌸 🌸 🌸</span>
-    <h1>{$nama}</h1>
-    <p>Undangan Resmi Peserta</p>
-  </div>
-  <div class="body">
-    <p class="greeting">Dear {$peserta},</p>
-    <p class="intro">Kami mengundang Bapak/Ibu untuk dapat menghadiri acara <strong>"{$nama}"</strong> yang akan dilaksanakan pada :</p>
+<body style="margin:0;padding:0;background:#f0f4f0;font-family:'Segoe UI',Arial,sans-serif;color:#1a2e40;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f0;padding:32px 8px;">
+<tr><td align="center">
+<table width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
 
-    <div class="info-box">
-      <div class="info-row">
-        <span class="info-icon">📅</span>
-        <div><div class="info-label">Hari, Tanggal</div><div class="info-value">{$tanggal}</div></div>
-      </div>
-      <hr class="info-sep">
-      <div class="info-row">
-        <span class="info-icon">🕖</span>
-        <div><div class="info-label">Waktu</div><div class="info-value">{$waktu} – selesai</div></div>
-      </div>
-      <hr class="info-sep">
-      <div class="info-row">
-        <span class="info-icon">📍</span>
-        <div><div class="info-label">Lokasi</div><div class="info-value">Bekasi Convention Center Kawasan CBD Mega City Bekasi, Mega Bekasi Hypermall Lt. 5, Jl. Jend. A. Yani No.1, Bekasi</div></div>
-      </div>
-      <hr class="info-sep">
-      <div class="info-row">
-        <span class="info-icon">📌</span>
-        <div><div class="info-label">Drop Off</div><div class="info-value">Lobby BCC, Lantai 5</div></div>
-      </div>
-      <hr class="info-sep">
-      <div class="info-row">
-        <span class="info-icon">👕</span>
-        <div><div class="info-label">Dress Code</div><div class="info-value">Polo / Kemeja Putih</div></div>
-      </div>
+  <!-- HEADER -->
+  <tr><td style="background:linear-gradient(160deg,#1b3d26 0%,#25563a 60%,#1e6b3e 100%);border-radius:20px 20px 0 0;padding:36px 32px 28px;text-align:center;">
+    {$logoHtml}
+    <div style="color:#a8f0c0;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">Undangan Resmi</div>
+    <div style="color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;margin-bottom:4px;">{$nama}</div>
+    <div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:5px 18px;">
+      <span style="color:#d4f5e0;font-size:12px;font-weight:600;">🌟 GROWTH WITH PASSION 🌟</span>
     </div>
+  </td></tr>
 
-    <div class="btn-wrap">
-      <a href="{$qrUrl}" class="btn">🎫 Konfirmasi Kehadiran</a>
-    </div>
-    <p class="note">Atas perhatian Bapak/Ibu kami ucapkan terimakasih.<br>See you there! 🚀✨</p>
-  </div>
-  <div class="footer">Pesan ini dikirim otomatis oleh sistem AbsenKID &nbsp;·&nbsp; &copy; Dharma Group</div>
-</div>
-</div>
+  <!-- DIAGONAL DIVIDER -->
+  <tr><td style="background:#ffffff;height:0;">
+    <div style="background:linear-gradient(160deg,#1e6b3e 50%,#ffffff 50%);height:32px;"></div>
+  </td></tr>
+
+  <!-- BODY -->
+  <tr><td style="background:#ffffff;padding:8px 32px 0;">
+    <p style="margin:0 0 4px;font-size:18px;font-weight:700;color:#1b3d26;">Dear <span style="color:#25563a;">{$peserta}</span>,</p>
+    <p style="margin:0 0 22px;font-size:14px;color:#4a5568;line-height:1.7;">Kami mengundang Bapak/Ibu untuk dapat menghadiri acara <strong style="color:#1b3d26;">"{$nama}"</strong> yang akan dilaksanakan pada :</p>
+
+    <!-- INFO CARDS -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+
+      <tr><td style="padding:0 0 10px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0faf4;border-radius:12px;border-left:4px solid #25563a;">
+          <tr>
+            <td style="padding:14px 16px;width:40px;font-size:22px;vertical-align:middle;">📅</td>
+            <td style="padding:14px 4px 14px 0;vertical-align:middle;">
+              <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Hari, Tanggal</div>
+              <div style="font-size:15px;font-weight:700;color:#1b3d26;">{$tanggal}</div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <tr><td style="padding:0 0 10px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0faf4;border-radius:12px;border-left:4px solid #25563a;">
+          <tr>
+            <td style="padding:14px 16px;width:40px;font-size:22px;vertical-align:middle;">🕖</td>
+            <td style="padding:14px 4px 14px 0;vertical-align:middle;">
+              <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Waktu</div>
+              <div style="font-size:15px;font-weight:700;color:#1b3d26;">{$waktu} – selesai</div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <tr><td style="padding:0 0 10px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0faf4;border-radius:12px;border-left:4px solid #25563a;">
+          <tr>
+            <td style="padding:14px 16px;width:40px;font-size:22px;vertical-align:middle;">📍</td>
+            <td style="padding:14px 4px 14px 0;vertical-align:middle;">
+              <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Lokasi</div>
+              <div style="font-size:14px;font-weight:700;color:#1b3d26;line-height:1.4;">Bekasi Convention Center<br><span style="font-weight:400;font-size:13px;color:#4a5568;">Kawasan CBD Mega City Bekasi, Mega Bekasi Hypermall Lt. 5, Jl. Jend. A. Yani No.1, Bekasi</span></div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <tr><td style="padding:0 0 10px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="width:49%;padding-right:6px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8f0;border-radius:12px;border-left:4px solid #e07820;">
+                <tr>
+                  <td style="padding:12px 14px;">
+                    <div style="font-size:20px;margin-bottom:4px;">📌</div>
+                    <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Drop Off</div>
+                    <div style="font-size:13px;font-weight:700;color:#7a3800;">Lobby BCC, Lantai 5</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td style="width:49%;padding-left:6px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4ff;border-radius:12px;border-left:4px solid #2352fb;">
+                <tr>
+                  <td style="padding:12px 14px;">
+                    <div style="font-size:20px;margin-bottom:4px;">👕</div>
+                    <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Dress Code</div>
+                    <div style="font-size:13px;font-weight:700;color:#1a2e8c;">Polo / Kemeja Putih</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+    </table>
+
+    <!-- CTA BUTTON -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 8px;">
+      <tr><td align="center">
+        <a href="{$qrUrl}" style="display:inline-block;background:linear-gradient(135deg,#1b3d26,#25563a);color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:50px;letter-spacing:.3px;">🎫 Konfirmasi Kehadiran</a>
+      </td></tr>
+    </table>
+
+    <p style="text-align:center;font-size:13px;color:#6b7280;margin:16px 0 28px;line-height:1.7;">Atas perhatian Bapak/Ibu kami ucapkan terimakasih.<br><strong>See you there! 🚀✨</strong></p>
+  </td></tr>
+
+  <!-- FOOTER -->
+  <tr><td style="background:linear-gradient(160deg,#1b3d26,#25563a);border-radius:0 0 20px 20px;padding:18px 32px;text-align:center;">
+    <p style="margin:0;color:#a8f0c0;font-size:11px;">Pesan ini dikirim otomatis &nbsp;·&nbsp; &copy; Dharma Group 2026</p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
 </body>
 </html>
 HTML;
