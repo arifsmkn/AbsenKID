@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --brand-cream:  #FDF5EF;
+        --brand-steel:  #40647E;
+        --brand-navy:   #244C6B;
+        --brand-red:    #D03F42;
+        --brand-slate:  #7B91A1;
+        --brand-bg:     #EDF2F7;
+    }
+    body {
+        color: #1a2e40;
+    }
+}
+
+@layer components {
+
+    /* ── Cards ── */
+    .card {
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5;
+        border: 1px solid rgba(36,76,107,0.1);
+    }
+    .dark .card {
+        border-color: rgba(255,255,255,0.06);
+    }
+    .card-compact {
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3.5;
+        border: 1px solid rgba(36,76,107,0.1);
+    }
+    .dark .card-compact {
+        border-color: rgba(255,255,255,0.06);
+    }
+
+    /* ── Form ── */
+    .input {
+        @apply rounded-lg px-3 py-2 text-sm transition-colors;
+        background: white;
+        border: 1.5px solid rgba(64,100,126,0.3);
+        color: #1a2e40;
+    }
+    .input:focus {
+        outline: none;
+        border-color: #244C6B;
+        box-shadow: 0 0 0 3px rgba(36,76,107,0.12);
+    }
+    .dark .input {
+        background: #1e2d3d;
+        border-color: rgba(123,145,161,0.25);
+        color: #e2e8f0;
+    }
+    .label {
+        @apply block text-sm font-semibold mb-1;
+        color: #244C6B;
+    }
+    .dark .label { color: #7B91A1; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+        @apply inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg transition-all;
+        background: #D03F42;
+        color: white;
+        box-shadow: 0 2px 8px rgba(208,63,66,0.25);
+    }
+    .btn-primary:hover {
+        background: #b03035;
+        box-shadow: 0 4px 12px rgba(208,63,66,0.35);
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all;
+        background: white;
+        border: 1.5px solid rgba(36,76,107,0.2);
+        color: #244C6B;
+    }
+    .btn-secondary:hover {
+        background: #EDF2F7;
+        border-color: rgba(36,76,107,0.4);
+    }
+    .dark .btn-secondary {
+        background: #1e2d3d;
+        border-color: rgba(123,145,161,0.2);
+        color: #7B91A1;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg transition-all;
+        background: #b03035;
+        color: white;
+    }
+    .btn-danger:hover { background: #8f2429; }
+
+    /* ── Badges ── */
+    .badge-blue {
+        @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold;
+        background: rgba(36,76,107,0.1);
+        color: #244C6B;
+    }
+    .dark .badge-blue {
+        background: rgba(64,100,126,0.2);
+        color: #7B91A1;
+    }
+    .badge-green {
+        @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold;
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    .badge-red {
+        @apply inline-block px-2 py-0.5 rounded-full text-xs font-semibold;
+        background: rgba(208,63,66,0.1);
+        color: #D03F42;
+    }
+    .badge-gray {
+        @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium;
+        background: rgba(123,145,161,0.15);
+        color: #7B91A1;
+    }
+}
+
+[x-cloak] { display: none !important; }
