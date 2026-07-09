@@ -4,8 +4,11 @@ cd /var/www/AbsenKID
 
 git pull origin main
 
-# Fix APP_URL untuk cloud (domain publik)
+# Fix konfigurasi untuk cloud
 sed -i 's|APP_URL=http://192.168.135.162|APP_URL=https://kid31.sankei-dharma.id|' .env
+sed -i 's|MAIL_HOST=mx.sankei-dharma.id|MAIL_HOST=127.0.0.1|' .env
+sed -i 's|MAIL_PORT=587|MAIL_PORT=25|' .env
+sed -i 's|MAIL_ENCRYPTION=tls|MAIL_ENCRYPTION=null|' .env
 
 # Rebuild cache Laravel
 php artisan config:cache
