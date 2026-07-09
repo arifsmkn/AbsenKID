@@ -175,19 +175,17 @@ class InvitationSendService
 <table width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
 
   <!-- HEADER -->
-  <tr><td style="background:linear-gradient(160deg,#1b3d26 0%,#25563a 60%,#1e6b3e 100%);border-radius:20px 20px 0 0;padding:36px 32px 28px;text-align:center;">
+  <tr><td bgcolor="#1e6b3e" style="background:linear-gradient(160deg,#1b3d26 0%,#25563a 60%,#1e6b3e 100%);border-radius:20px 20px 0 0;padding:36px 32px 28px;text-align:center;">
     {$logoHtml}
     <div style="color:#a8f0c0;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">Undangan Resmi</div>
     <div style="color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;margin-bottom:4px;">{$nama}</div>
-    <div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:5px 18px;">
-      <span style="color:#d4f5e0;font-size:12px;font-weight:600;">🌟 GROWTH WITH PASSION 🌟</span>
+    <div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:5px 18px;">
+      <span style="color:#ffffff;font-size:12px;font-weight:600;">🌟 GROWTH WITH PASSION 🌟</span>
     </div>
   </td></tr>
 
-  <!-- DIAGONAL DIVIDER -->
-  <tr><td style="background:#ffffff;height:0;">
-    <div style="background:linear-gradient(160deg,#1e6b3e 50%,#ffffff 50%);height:32px;"></div>
-  </td></tr>
+  <!-- DIVIDER -->
+  <tr><td bgcolor="#25563a" style="background:#25563a;height:8px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
 
   <!-- BODY -->
   <tr><td style="background:#ffffff;padding:8px 32px 0;">
@@ -275,7 +273,7 @@ class InvitationSendService
   </td></tr>
 
   <!-- FOOTER -->
-  <tr><td style="background:linear-gradient(160deg,#1b3d26,#25563a);border-radius:0 0 20px 20px;padding:18px 32px;text-align:center;">
+  <tr><td bgcolor="#1b3d26" style="background:linear-gradient(160deg,#1b3d26,#25563a);border-radius:0 0 20px 20px;padding:18px 32px;text-align:center;">
     <p style="margin:0;color:#a8f0c0;font-size:11px;">Pesan ini dikirim otomatis &nbsp;·&nbsp; &copy; Dharma Group 2026</p>
   </td></tr>
 
