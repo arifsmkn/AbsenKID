@@ -79,6 +79,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,user'])-
     Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
     Route::get('employees/template', [EmployeeController::class, 'downloadTemplate'])->name('employees.template');
+    Route::delete('employees/clear-all', [EmployeeController::class, 'clearAll'])->name('employees.clear-all');
     Route::resource('employees', EmployeeController::class);
 
     // Events

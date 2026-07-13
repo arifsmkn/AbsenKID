@@ -22,8 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force HTTPS di production (Cloudflare reverse proxy)
-        if (config('app.env') === 'production') {
+        // Force HTTPS di production, tapi hanya kalau request memang masuk lewat
+        // Cloudflare (proxy https->http). Akses langsung via IP/http tetap http,
+        // supaya asset CSS/JS tidak dipaksa https saat tidak ada TLS di origin.
+        if (config('app.env') === 'production' && request()->header('X-Forwarded-Proto') === 'https') {
             URL::forceScheme('https');
         }
 

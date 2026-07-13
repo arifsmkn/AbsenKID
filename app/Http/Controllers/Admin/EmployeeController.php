@@ -6,8 +6,15 @@ use App\Exports\EmployeesExport;
 use App\Exports\EmployeeTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Imports\EmployeesImport;
+use App\Models\Attendance;
+use App\Models\AttendanceConfirmation;
+use App\Models\DoorprizeWinner;
 use App\Models\Employee;
+use App\Models\Invitation;
+use App\Models\InvitationSend;
+use App\Models\ScanNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeController extends Controller
@@ -116,6 +123,26 @@ class EmployeeController extends Controller
     public function export()
     {
         return Excel::download(new EmployeesExport, 'employees-' . date('Ymd') . '.xlsx');
+    }
+
+    public function clearAll(Request $request)
+    {
+        $request->validate([
+            'confirm_text' => 'required|in:HAPUS SEMUA',
+        ]);
+
+        DB::transaction(function () {
+            ScanNotification::query()->delete();
+            InvitationSend::query()->delete();
+            Attendance::query()->delete();
+            DoorprizeWinner::query()->delete();
+            AttendanceConfirmation::query()->delete();
+            Invitation::query()->delete();
+            Employee::query()->delete();
+        });
+
+        return redirect()->route('admin.employees.index')
+            ->with('success', 'Semua data master karyawan beserta data terkait (undangan, absensi, konfirmasi, doorprize) berhasil dihapus.');
     }
 
     public function downloadTemplate()

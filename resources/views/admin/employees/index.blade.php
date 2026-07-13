@@ -16,6 +16,7 @@
         <a href="{{ route('admin.employees.create') }}" class="btn-primary">+ Tambah</a>
         <button onclick="document.getElementById('importModal').classList.remove('hidden')" class="btn-secondary">📥 Import</button>
         <a href="{{ route('admin.employees.export') }}" class="btn-secondary">📤 Export</a>
+        <button onclick="document.getElementById('clearAllModal').classList.remove('hidden')" class="btn-secondary text-red-600">🗑️ Hapus Semua</button>
     </div>
 </div>
 
@@ -77,6 +78,25 @@
             <div class="flex gap-2 justify-end">
                 <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="btn-secondary">Batal</button>
                 <button class="btn-primary">Import</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Clear All Modal --}}
+<div id="clearAllModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="card w-full max-w-md">
+        <h3 class="font-semibold mb-2 text-red-600">⚠️ Hapus Semua Data Karyawan</h3>
+        <p class="text-sm text-gray-500 mb-3">
+            Ini akan menghapus <strong>seluruh</strong> data karyawan beserta data terkait (undangan, absensi, konfirmasi kehadiran, pemenang doorprize, log kirim WA/email). Tindakan ini <strong>tidak bisa dibatalkan</strong>.
+        </p>
+        <form method="POST" action="{{ route('admin.employees.clear-all') }}" onsubmit="return confirm('Yakin? Semua data karyawan & data terkait akan dihapus permanen.')">
+            @csrf @method('DELETE')
+            <label class="text-sm font-medium mb-1 block">Ketik <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">HAPUS SEMUA</code> untuk konfirmasi:</label>
+            <input type="text" name="confirm_text" class="input w-full mb-4" autocomplete="off" required>
+            <div class="flex gap-2 justify-end">
+                <button type="button" onclick="document.getElementById('clearAllModal').classList.add('hidden')" class="btn-secondary">Batal</button>
+                <button class="btn-primary bg-red-600 hover:bg-red-700">Hapus Semua</button>
             </div>
         </form>
     </div>
