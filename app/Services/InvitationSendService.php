@@ -62,6 +62,14 @@ class InvitationSendService
 
             $body = $response->json();
 
+            Log::info('WA send payload/response', [
+                'invitation_id' => $invitation->id,
+                'target'        => $phone,
+                'api_url'       => $apiUrl,
+                'http_status'   => $response->status(),
+                'response_body' => $body ?? $response->body(),
+            ]);
+
             if ($response->successful() && ($body['status'] ?? false)) {
                 $this->logSend($invitation, 'whatsapp', $phone, 'sent');
                 return true;
