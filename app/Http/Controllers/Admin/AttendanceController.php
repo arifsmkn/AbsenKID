@@ -157,6 +157,11 @@ class AttendanceController extends Controller
     public function destroy(Attendance $attendance)
     {
         $nama = $attendance->employee->nama ?? $attendance->employee_npk;
+
+        if ($attendance->invitation_id) {
+            Invitation::where('id', $attendance->invitation_id)->update(['is_confirmed' => false]);
+        }
+
         $attendance->delete();
         return back()->with('success', "Kehadiran {$nama} berhasil dihapus.");
     }
