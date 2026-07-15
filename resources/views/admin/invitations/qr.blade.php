@@ -19,7 +19,6 @@
         <h2 class="text-xl font-bold">{{ $invitation->employee->nama }}</h2>
         <p class="text-gray-500 text-sm">NPK: {{ $invitation->employee->npk }}</p>
         <p class="text-gray-500 text-sm">{{ $invitation->employee->subco }}</p>
-        <p class="text-gray-500 text-sm">{{ $invitation->employee->jabatan }}</p>
         <div class="mt-4 p-3 bg-gray-50 rounded-xl text-xs text-gray-400 font-mono break-all">
             {{ $invitation->qr_code }}
         </div>

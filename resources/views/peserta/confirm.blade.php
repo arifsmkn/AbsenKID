@@ -53,7 +53,6 @@
             </div>
             <p class="font-bold text-white text-lg">{{ $employee->nama }}</p>
             <p class="text-blue-200 text-sm">{{ $employee->npk }} · {{ $employee->subco }}</p>
-            <p class="text-white/50 text-xs mt-0.5">{{ $employee->jabatan }}</p>
         </div>
 
         {{-- Pilihan --}}

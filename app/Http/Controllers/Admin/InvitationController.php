@@ -273,6 +273,10 @@ class InvitationController extends Controller
                 $ok = in_array(true, $result, true);
             }
             $ok ? $sent++ : $failed++;
+
+            if (in_array($channel, ['wa', 'both'])) {
+                sleep(5);
+            }
         }
 
         return back()->with('success', "Pengiriman selesai: {$sent} berhasil, {$failed} gagal dari {$invitations->count()} undangan.");

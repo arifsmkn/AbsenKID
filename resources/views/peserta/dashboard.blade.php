@@ -117,7 +117,6 @@
         <div class="px-6 py-4 text-center border-t border-gray-100 mt-2">
             <p class="font-bold text-gray-800 text-xl leading-tight">{{ $employee->nama }}</p>
             <p class="text-gray-500 text-sm mt-0.5">{{ $employee->npk }} · {{ $employee->subco }}</p>
-            <p class="text-gray-400 text-xs mt-0.5">{{ $employee->jabatan }}</p>
             <div class="mt-3">
                 <span class="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold">
                     🎫 Undangan Resmi
