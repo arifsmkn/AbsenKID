@@ -158,8 +158,18 @@ class AttendanceController extends Controller
     {
         $nama = $attendance->employee->nama ?? $attendance->employee_npk;
 
+        // is_confirmed juga bisa diset true dari RSVP "Akan Hadir" (sebelum scan).
+        // Cuma reset kalau memang tidak ada RSVP hadir yang sah, supaya tidak
+        // menghapus konfirmasi valid milik peserta yang belum waktunya discan.
         if ($attendance->invitation_id) {
-            Invitation::where('id', $attendance->invitation_id)->update(['is_confirmed' => false]);
+            $hasRsvpHadir = AttendanceConfirmation::where('event_id', $attendance->event_id)
+                ->where('employee_npk', $attendance->employee_npk)
+                ->where('status', 'hadir')
+                ->exists();
+
+            if (!$hasRsvpHadir) {
+                Invitation::where('id', $attendance->invitation_id)->update(['is_confirmed' => false]);
+            }
         }
 
         $attendance->delete();
