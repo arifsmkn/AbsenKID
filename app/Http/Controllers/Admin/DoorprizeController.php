@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Doorprize;
+use App\Models\DoorprizeDisqualified;
 use App\Models\DoorprizeExcludeRole;
 use App\Models\DoorprizeWinner;
 use App\Models\Employee;
@@ -90,6 +91,8 @@ class DoorprizeController extends Controller
         $doorprizes  = $event->doorprizes()->orderBy('urutan')->get();
 
         $alreadyWon      = DoorprizeWinner::where('event_id', $event->id)->pluck('employee_npk')->toArray();
+        $disqualified    = DoorprizeDisqualified::where('event_id', $event->id)->pluck('employee_npk')->toArray();
+        $alreadyWon      = array_merge($alreadyWon, $disqualified);
         $excludedJabatan = DoorprizeExcludeRole::pluck('jabatan')->toArray();
 
         $eligibleCount = Attendance::where('event_id', $event->id)
@@ -123,9 +126,13 @@ class DoorprizeController extends Controller
             ->where('event_id', $event->id)
             ->orderByDesc('won_at')->get();
 
+        $disqualifiedList = DoorprizeDisqualified::with('employee')
+            ->where('event_id', $event->id)
+            ->orderByDesc('disqualified_at')->get();
+
         return view('admin.doorprizes.spin', compact(
             'event', 'doorprizes', 'eligibleCount', 'jabatanList', 'subcoList',
-            'subcoEligibleCounts', 'displayUrl', 'winners', 'excludedJabatan'
+            'subcoEligibleCounts', 'displayUrl', 'winners', 'excludedJabatan', 'disqualifiedList'
         ));
     }
 
@@ -141,6 +148,7 @@ class DoorprizeController extends Controller
 
         $event      = Event::where('is_active', true)->firstOrFail();
         $alreadyWon = DoorprizeWinner::where('event_id', $event->id)->pluck('employee_npk')->toArray();
+        $alreadyWon = array_merge($alreadyWon, DoorprizeDisqualified::where('event_id', $event->id)->pluck('employee_npk')->toArray());
 
         $excludedJabatan = DoorprizeExcludeRole::pluck('jabatan')->toArray();
         // Merge master exclude + manual tambahan dari request
@@ -247,6 +255,28 @@ class DoorprizeController extends Controller
     {
         $winner->delete();
         return back()->with('success', 'Pemenang berhasil dihapus. Peserta kembali eligible untuk spin.');
+    }
+
+    /** Tandai NPK hangus/tidak ada saat dipanggil — tidak boleh ikut undian lagi di event ini */
+    public function disqualify(Request $request)
+    {
+        $request->validate(['employee_npk' => 'required|exists:employees,npk']);
+
+        $event = Event::where('is_active', true)->firstOrFail();
+
+        DoorprizeDisqualified::firstOrCreate(
+            ['event_id' => $event->id, 'employee_npk' => $request->employee_npk],
+            ['disqualified_at' => now()]
+        );
+
+        return response()->json(['ok' => true]);
+    }
+
+    /** Batalkan status hangus — peserta eligible lagi untuk undian */
+    public function destroyDisqualified(DoorprizeDisqualified $disqualified)
+    {
+        $disqualified->delete();
+        return back()->with('success', 'Status hangus dibatalkan. Peserta kembali eligible untuk spin.');
     }
 
     /** Hapus semua pemenang event aktif (gambar/hadiah tetap aman) */
@@ -365,6 +395,8 @@ class DoorprizeController extends Controller
 
         $event           = Event::where('is_active', true)->firstOrFail();
         $alreadyWon      = DoorprizeWinner::where('event_id', $event->id)->pluck('employee_npk')->toArray();
+        $disqualified    = DoorprizeDisqualified::where('event_id', $event->id)->pluck('employee_npk')->toArray();
+        $alreadyWon      = array_merge($alreadyWon, $disqualified);
         $excludedJabatan = DoorprizeExcludeRole::pluck('jabatan')->toArray();
         $allExcluded     = array_unique(array_merge($excludedJabatan, $request->excluded_jabatan ?? []));
 
@@ -529,6 +561,7 @@ class DoorprizeController extends Controller
 
         $event      = Event::where('is_active', true)->firstOrFail();
         $alreadyWon = DoorprizeWinner::where('event_id', $event->id)->pluck('employee_npk')->toArray();
+        $alreadyWon = array_merge($alreadyWon, DoorprizeDisqualified::where('event_id', $event->id)->pluck('employee_npk')->toArray());
 
         // NPK yang sedang dipegang slot lain tidak boleh diundi ulang
         $heldNpk = collect($current['slots'])

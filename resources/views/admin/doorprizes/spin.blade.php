@@ -361,11 +361,13 @@ $typeMeta = [
                                 <p class="truncate" style="color:#7B91A1" x-text="slot.winner.subco"></p>
                             </div>
                         </template>
-                        <div class="flex gap-1 mt-2 justify-center">
+                        <div class="flex gap-1 mt-2 justify-center flex-wrap">
                             <button @click="multiStopSlot(slot.id)" :disabled="slot.state !== 'spinning' || multiBusy"
                                     class="text-xs px-2 py-1 rounded-lg text-white disabled:opacity-30" style="background:#D03F42">Stop</button>
                             <button @click="multiResetSlot(slot.id)" :disabled="multiBusy"
                                     class="text-xs px-2 py-1 rounded-lg disabled:opacity-30" style="background:rgba(123,145,161,0.15); color:#7B91A1">Ulang</button>
+                            <button @click="multiDisqualifySlot(slot.id)" x-show="slot.state === 'winner'" :disabled="multiBusy"
+                                    class="text-xs px-2 py-1 rounded-lg text-white disabled:opacity-30" style="background:#7c2d2d">❌ Hangus</button>
                         </div>
                     </div>
                 </template>
@@ -586,12 +588,19 @@ $typeMeta = [
 
                     <div class="flex gap-2 mt-4 justify-center">
                         <button @click="saveWinner()"
-                                :disabled="saved || saving"
+                                :disabled="saved || saving || disqualifying"
                                 class="px-6 py-2.5 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
                                 style="background:#22c55e">
                             <span x-show="!saving && !saved">💾 Simpan</span>
                             <span x-show="saving" x-cloak>⏳ Menyimpan...</span>
                             <span x-show="saved" x-cloak>✅ Tersimpan!</span>
+                        </button>
+                        <button @click="disqualifyWinner()" x-show="!saved" x-cloak
+                                :disabled="saving || disqualifying"
+                                class="px-6 py-2.5 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+                                style="background:#D03F42">
+                            <span x-show="!disqualifying">❌ Tidak Ada / Hangus</span>
+                            <span x-show="disqualifying" x-cloak>⏳ Memproses...</span>
                         </button>
                         <button @click="nextOrReset()" x-show="saved" x-cloak
                                 class="px-6 py-2.5 text-white font-semibold rounded-xl transition-all"
@@ -712,6 +721,58 @@ $typeMeta = [
         @endif
     </div>
 
+    {{-- ════════════════════════════════════════════
+         PESERTA HANGUS (dipanggil tapi tidak ada)
+         ════════════════════════════════════════════ --}}
+    <div class="card">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="font-bold text-base">❌ Peserta Hangus</h3>
+                <p class="text-xs mt-0.5" style="color:#7B91A1">{{ $disqualifiedList->count() }} peserta ditandai hangus (dipanggil tapi tidak ada) · tidak ikut undian lagi</p>
+            </div>
+        </div>
+
+        @if($disqualifiedList->isEmpty())
+        <div class="text-center py-6" style="color:#7B91A1">
+            <p class="text-sm">Belum ada peserta yang ditandai hangus.</p>
+        </div>
+        @else
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-xs uppercase tracking-widest" style="color:#7B91A1; border-bottom:1px solid rgba(123,145,161,0.2)">
+                        <th class="py-2 px-3 text-left">NPK</th>
+                        <th class="py-2 px-3 text-left">Nama</th>
+                        <th class="py-2 px-3 text-left">SubCo</th>
+                        <th class="py-2 px-3 text-center">Waktu</th>
+                        <th class="py-2 px-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($disqualifiedList as $d)
+                    <tr class="border-b" style="border-color:rgba(123,145,161,0.1)">
+                        <td class="py-3 px-3 font-mono text-xs" style="color:#40647E">{{ $d->employee_npk }}</td>
+                        <td class="py-3 px-3 font-semibold">{{ $d->employee->nama ?? '-' }}</td>
+                        <td class="py-3 px-3"><span class="badge-blue">{{ $d->employee->subco ?? '-' }}</span></td>
+                        <td class="py-3 px-3 text-center text-xs" style="color:#7B91A1">{{ $d->disqualified_at?->format('H:i:s') }}</td>
+                        <td class="py-3 px-3 text-center">
+                            @if(auth()->user()->hasRole('admin'))
+                            <form method="POST" action="{{ route('admin.doorprizes.destroyDisqualified', $d) }}"
+                                  onsubmit="return confirm('Batalkan status hangus {{ addslashes($d->employee->nama ?? '') }}? Peserta ini akan eligible lagi untuk undian.')">
+                                @csrf @method('DELETE')
+                                <button class="text-xs px-2 py-1 rounded-lg transition-all"
+                                        style="color:#244C6B; border:1px solid rgba(36,76,107,0.25)">Batalkan</button>
+                            </form>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+    </div>
+
 </div>
 @endsection
 
@@ -725,6 +786,7 @@ function spinApp() {
         winner: null,
         saving: false,
         saved: false,
+        disqualifying: false,
         excludedJabatan: [],
         selectedSubcos: [],
         allJabatan: @json($jabatanList),
@@ -972,6 +1034,24 @@ function spinApp() {
             }
         },
 
+        async multiDisqualifySlot(slotId) {
+            const slot = this.multiSlots.find(s => s.id === slotId);
+            if (!slot || !slot.winner) return;
+            if (!confirm(`Tandai ${slot.winner.nama} (NPK ${slot.winner.npk}) hangus? Tidak akan bisa ikut undian lagi di event ini.`)) return;
+            this.multiBusy = true;
+            try {
+                const res = await fetch('{{ route('admin.doorprizes.disqualify') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: JSON.stringify({ employee_npk: slot.winner.npk })
+                });
+                if (!res.ok) { alert('Gagal menandai hangus.'); return; }
+            } finally {
+                this.multiBusy = false;
+            }
+            await this.multiResetSlot(slotId);
+        },
+
         async multiResetAllSlots() {
             if (!confirm('Reset seluruh sesi multi-spin? Pemenang yang belum disimpan akan hilang.')) return;
             this.multiBusy = true;
@@ -1095,6 +1175,25 @@ function spinApp() {
                 setTimeout(() => { if (this.saved) { window.location.reload(); } }, 3000);
             } else {
                 alert(data.error || 'Gagal menyimpan.');
+            }
+        },
+
+        async disqualifyWinner() {
+            if (!this.winner || this.saving || this.disqualifying) return;
+            if (!confirm(`Tandai ${this.winner.nama} (NPK ${this.winner.npk}) hangus? Tidak akan bisa ikut undian lagi di event ini.`)) return;
+            this.disqualifying = true;
+            try {
+                const res = await fetch('{{ route('admin.doorprizes.disqualify') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: JSON.stringify({ employee_npk: this.winner.npk })
+                });
+                if (!res.ok) { alert('Gagal menandai hangus.'); return; }
+                this.eligibleCount = Math.max(0, this.eligibleCount - 1);
+                this.winner = null; this._resolved = null; this.displayNpk = '';
+                this.syncDisplay('reset');
+            } finally {
+                this.disqualifying = false;
             }
         },
 

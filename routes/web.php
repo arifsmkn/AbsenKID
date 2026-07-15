@@ -125,6 +125,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,user'])-
     Route::post('doorprize/multi/save-winners', [DoorprizeController::class, 'multiSaveWinners'])->name('doorprizes.multiSaveWinners');
     Route::post('doorprize/reset-winners', [DoorprizeController::class, 'resetWinners'])->name('doorprizes.resetWinners')->middleware('role:admin');
     Route::delete('doorprize/winners/{winner}', [DoorprizeController::class, 'destroyWinner'])->name('doorprizes.destroyWinner')->middleware('role:admin');
+    Route::post('doorprize/disqualify', [DoorprizeController::class, 'disqualify'])->name('doorprizes.disqualify');
+    Route::delete('doorprize/disqualified/{disqualified}', [DoorprizeController::class, 'destroyDisqualified'])->name('doorprizes.destroyDisqualified')->middleware('role:admin');
 
     // Doorprize Exclude Roles
     Route::get('doorprize-exclude-roles', [DoorprizeExcludeRoleController::class, 'index'])->name('doorprize-exclude-roles.index')->middleware('role:admin');

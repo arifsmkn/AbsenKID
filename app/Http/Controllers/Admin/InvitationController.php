@@ -276,6 +276,8 @@ class InvitationController extends Controller
 
             if (in_array($channel, ['wa', 'both'])) {
                 sleep(5);
+            } elseif ($channel === 'email') {
+                sleep(2);
             }
         }
 
