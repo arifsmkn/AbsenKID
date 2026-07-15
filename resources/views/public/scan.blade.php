@@ -29,6 +29,20 @@
         <p class="text-gray-400">Arahkan kamera ke QR code pada undangan Anda</p>
     </div>
 
+    @if(!$authorized)
+        {{-- Gate PIN kiosk: cuma device panitia yang boleh lanjut ke scanner --}}
+        <div class="w-full max-w-xs">
+            <p class="text-gray-400 text-sm text-center mb-3">Masukkan PIN kiosk panitia untuk mulai scan:</p>
+            @if($errors->any())
+                <p class="text-red-400 text-xs text-center mb-2">{{ $errors->first('pin') }}</p>
+            @endif
+            <form method="POST" action="{{ route('scan.kiosk-auth') }}" class="flex gap-2">
+                @csrf
+                <input type="password" name="pin" placeholder="PIN..." class="input flex-1 bg-gray-800 border-gray-700 text-white text-sm" required autofocus>
+                <button class="btn-primary">Masuk</button>
+            </form>
+        </div>
+    @else
     {{-- Camera scanner --}}
     <div class="relative mb-8" x-show="!result">
         <div class="relative w-72 h-72 mx-auto" x-show="!cameraError">
@@ -66,6 +80,7 @@
             <button class="btn-primary">Go</button>
         </form>
     </div>
+    @endif
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
@@ -74,6 +89,7 @@
             result: null,
             cameraError: null,
             init() {
+                if (!{{ $authorized ? 'true' : 'false' }}) return;
                 if (!window.isSecureContext) {
                     this.cameraError = 'Halaman ini dibuka lewat HTTP biasa. Browser (terutama di iPhone/iOS) memblokir akses kamera kecuali lewat HTTPS. Buka https://' + window.location.host + ' lalu coba lagi, atau pakai input manual di bawah.';
                     return;

@@ -8,18 +8,45 @@ use App\Models\Employee;
 use App\Models\Event;
 use App\Models\Invitation;
 use App\Models\ScanNotification;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class ScanController extends Controller
 {
     public function index()
     {
-        $event = Event::where('is_active', true)->first();
-        return view('public.scan', compact('event'));
+        $event      = Event::where('is_active', true)->first();
+        $authorized = session('kiosk_authorized', false);
+        return view('public.scan', compact('event', 'authorized'));
+    }
+
+    // Verifikasi PIN kiosk — sekali per device/browser session, mencegah peserta
+    // menandai diri sendiri "Hadir" cuma dengan buka QR mereka sendiri dari HP pribadi.
+    public function kioskAuth(Request $request)
+    {
+        $request->validate(['pin' => 'required|string']);
+
+        $validPin = Setting::get('kiosk_pin', '271108');
+
+        if ($request->pin !== $validPin) {
+            return back()->withErrors(['pin' => 'PIN salah.']);
+        }
+
+        session(['kiosk_authorized' => true]);
+        return redirect()->route('scan.index');
     }
 
     public function scanQr(string $qrCode)
     {
+        if (!session('kiosk_authorized')) {
+            return view('public.scan-result', [
+                'status'     => 'invalid',
+                'message'    => 'Scan hanya bisa dilakukan lewat kiosk resmi panitia di venue. Silakan datang ke booth check-in.',
+                'employee'   => null,
+                'invitation' => null,
+            ]);
+        }
+
         $invitation = Invitation::with('employee', 'event')
             ->where('qr_code', $qrCode)
             ->first();

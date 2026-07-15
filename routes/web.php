@@ -37,6 +37,7 @@ Route::get('/dashboard', function () {
 // Kiosk scan (public, no auth)
 Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
 Route::post('/scan', [ScanController::class, 'process'])->name('scan.process');
+Route::post('/scan/kiosk-auth', [ScanController::class, 'kioskAuth'])->name('scan.kiosk-auth');
 Route::post('/scan/npk', [ScanController::class, 'scanByNpk'])->name('scan.npk');
 Route::get('/scan/qr/{qr_code}', [ScanController::class, 'scanQr'])->name('scan.qr');
 
