@@ -50,7 +50,7 @@
         <div class="rounded-2xl p-5 text-center flex flex-col items-center justify-center bg-white"
              style="border:1px solid rgba(36,76,107,0.12)">
             <p class="text-5xl font-black" style="color:#22c55e" x-text="data.totalAttended ?? 0"></p>
-            <p class="text-gray-500 text-sm mt-1">Hadir Fisik</p>
+            <p class="text-gray-500 text-sm mt-1">Hadir Scan QR</p>
         </div>
         <div class="flex flex-col gap-4">
             <div class="rounded-2xl p-4 text-center bg-white" style="border:1px solid rgba(36,76,107,0.12)">
