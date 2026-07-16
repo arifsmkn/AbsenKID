@@ -808,6 +808,18 @@ function spinApp() {
             // Seed keys with high values to avoid clash with static init keys above
             this._odoKeyCounter = Date.now();
             this._resetOdo();
+
+            // Eksklusi Jabatan disimpan di localStorage — supaya tidak hilang
+            // tiap kali halaman auto-reload setelah simpan pemenang, dan berlaku
+            // sama untuk semua tipe (Doorprize/Utama/Grand Prize), tidak perlu
+            // dicentang ulang bolak-balik.
+            try {
+                const saved = JSON.parse(localStorage.getItem('doorprize_excludedJabatan') || '[]');
+                if (Array.isArray(saved)) this.excludedJabatan = saved.filter(j => this.allJabatan.includes(j));
+            } catch (e) {}
+            this.$watch('excludedJabatan', (val) => {
+                try { localStorage.setItem('doorprize_excludedJabatan', JSON.stringify(val)); } catch (e) {}
+            });
         },
 
         _resetOdo() {
