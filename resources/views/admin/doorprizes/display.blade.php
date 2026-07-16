@@ -10,23 +10,56 @@
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0d1e2d;
-            color: #fff;
+            color: #1a2e40;
+            @if($event?->wallpaper_url)
+            background: linear-gradient(rgba(243,244,246,0.90), rgba(243,244,246,0.90)),
+                        url('{{ $event->wallpaper_url }}') center/cover fixed no-repeat;
+            @else
+            background: #f3f4f6;
+            @endif
         }
 
-        /* ── Background states ── */
-        .bg-idle    { background: radial-gradient(ellipse at 50% 30%, #1a2e40 0%, #0d1e2d 70%); }
-        .bg-spinning{ background: radial-gradient(ellipse at 50% 30%, #1a3655 0%, #0d1e2d 70%); }
-        .bg-winner  { background: radial-gradient(ellipse at 50% 30%, #1e3a28 0%, #0d1e2d 70%); }
-        .bg-winner-utama{ background: radial-gradient(ellipse at 50% 30%, #2e3744 0%, #0d1e2d 70%); }
-        .bg-winner-gp{ background: radial-gradient(ellipse at 50% 30%, #3a2010 0%, #0d1e2d 70%); }
+        /* ── Mood tint overlay per state — halus, tidak menutupi wallpaper ── */
+        .mood-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 1;
+            opacity: 0; transition: opacity 0.6s ease;
+            background: radial-gradient(ellipse at 50% 30%, var(--mood-color, transparent) 0%, transparent 70%);
+        }
+        .mood-idle     { opacity: 0.5; --mood-color: rgba(36,76,107,0.10); }
+        .mood-spinning { opacity: 0.7; --mood-color: rgba(99,102,241,0.16); }
+        .mood-winner        { opacity: 0.8; --mood-color: rgba(34,197,94,0.18); animation: bgPulse 3.5s ease-in-out infinite; }
+        .mood-winner-utama  { opacity: 0.8; --mood-color: rgba(100,116,139,0.18); animation: bgPulse 3.5s ease-in-out infinite; }
+        .mood-winner-gp     { opacity: 0.8; --mood-color: rgba(245,158,11,0.20); animation: bgPulse 3.5s ease-in-out infinite; }
+        @keyframes bgPulse {
+            0%,100% { filter: brightness(1); }
+            50%     { filter: brightness(1.3); }
+        }
 
-        /* ── Scanline ── */
-        body::after {
-            content: '';
-            position: fixed; inset: 0;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
-            pointer-events: none; z-index: 999;
+        /* ── Rotating spotlight rays (nyala pas ada pemenang) ── */
+        .rays-wrap {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .rays {
+            width: 160vmax; height: 160vmax;
+            background: repeating-conic-gradient(from 0deg, rgba(36,76,107,0.07) 0deg 4deg, transparent 4deg 16deg);
+            animation: spinRays 50s linear infinite;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .rays-on { opacity: 1; }
+        @keyframes spinRays { to { transform: rotate(360deg); } }
+
+        /* ── Ambient sparkle (twinkling) ── */
+        .sparkle-wrap { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+        .sparkle {
+            position: absolute; border-radius: 50%; background: #f59e0b;
+            animation: twinkle 3.2s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.4); }
+            50%      { opacity: 0.7; transform: scale(1.4); }
         }
 
         /* ── NPK Drum ── */
@@ -204,18 +237,33 @@
         .odo-landing-tv { animation: odo-land-tv 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     </style>
 </head>
-<body x-data="displayApp()" :class="bgClass()" class="flex flex-col h-screen">
+<body x-data="displayApp()" class="flex flex-col h-screen">
 
-{{-- Confetti (grand prize) --}}
-<div class="confetti-wrap" x-show="state==='winner' && doorprize?.type==='grand_prize'" x-cloak>
-    <template x-for="n in 70" :key="n">
+{{-- Mood tint halus sesuai state — wallpaper tetap dominan --}}
+<div class="mood-overlay" :class="bgClass()"></div>
+
+{{-- Confetti (semua tipe pemenang, single-spin maupun multi) --}}
+<div class="confetti-wrap" x-show="(state==='winner' && !isMulti) || (isMulti && state==='winner')" x-cloak>
+    <template x-for="n in 90" :key="n">
         <div :style="`
             position:absolute;
             left:${(n*7.3)%100}%;
             width:${8+n%7}px; height:${12+n%9}px;
-            border-radius:2px;
+            border-radius:${n%2===0 ? '2px' : '50%'};
             background:hsl(${n*37%360},85%,60%);
             animation: fall ${2.5+n%3}s linear ${(n*0.07)%3}s infinite;
+        `"></div>
+    </template>
+</div>
+
+{{-- Ambient sparkle — nyala terus biar background tidak monoton --}}
+<div class="sparkle-wrap">
+    <template x-for="n in 35" :key="'sp'+n">
+        <div class="sparkle" :style="`
+            left:${(n*13.7)%100}%;
+            top:${(n*23.1)%100}%;
+            width:${2+n%3}px; height:${2+n%3}px;
+            animation-delay:${(n*0.13)%3.2}s;
         `"></div>
     </template>
 </div>
@@ -241,15 +289,20 @@
 {{-- ── MAIN ── --}}
 <main class="flex-1 flex flex-col items-center justify-center overflow-hidden relative" style="min-height:0">
 
+    {{-- Spotlight rays berputar — nyala pas ada pemenang --}}
+    <div class="rays-wrap">
+        <div class="rays" :class="state==='winner' ? 'rays-on' : ''"></div>
+    </div>
+
     {{-- ══ IDLE ══ --}}
-    <div x-show="!isMulti && state==='idle'" class="text-center">
+    <div x-show="!isMulti && state==='idle'" class="text-center relative">
         <div class="text-8xl mb-6 opacity-20">🎲</div>
-        <p class="text-2xl font-light tracking-widest uppercase" style="color:rgba(123,145,161,0.5)">Menunggu Undian…</p>
+        <p class="text-2xl font-light tracking-widest uppercase" style="color:rgba(26,46,64,0.55)">Menunggu Undian…</p>
     </div>
 
     {{-- ══ SPINNING / SETTLING ══ --}}
     <div x-show="!isMulti && (state==='spinning' || state==='settling')" x-cloak
-         class="w-full h-full flex flex-col items-center justify-center gap-3 px-8 py-4">
+         class="w-full h-full flex flex-col items-center justify-center gap-3 px-8 py-4 relative">
 
         {{-- 1. LABEL DOORPRIZE / GRAND PRIZE --}}
         <p class="font-black uppercase tracking-[0.25em] leading-none text-center"
@@ -261,16 +314,16 @@
         <div class="flex items-center justify-center" style="height:20vh">
             <template x-if="doorprize?.gambar">
                 <img :src="doorprize.gambar" class="h-full w-auto object-contain rounded-2xl img-appear"
-                     style="max-width:32vw; border:2px solid rgba(123,145,161,0.15); background:rgba(255,255,255,0.04); padding:10px;"
+                     style="max-width:32vw; border:2px solid rgba(36,76,107,0.15); background:rgba(255,255,255,0.65); padding:10px; box-shadow:0 4px 20px rgba(36,76,107,0.1);"
                      alt="Hadiah">
             </template>
             <template x-if="!doorprize?.gambar">
-                <div class="text-9xl opacity-20" x-text="typeTheme().emptyEmoji"></div>
+                <div class="text-9xl opacity-30" x-text="typeTheme().emptyEmoji"></div>
             </template>
         </div>
 
         {{-- 3. NAMA HADIAH --}}
-        <p class="font-black text-white text-center leading-none"
+        <p class="font-black text-gray-800 text-center leading-none"
            style="font-size:clamp(2.8rem,6vw,6rem)"
            x-text="doorprize?.nama ?? '—'"></p>
 
@@ -296,7 +349,7 @@
         </div>
 
         {{-- 5. Status label --}}
-        <p class="text-xs tracking-[0.3em] uppercase animate-pulse" style="color:rgba(123,145,161,0.35)"
+        <p class="text-xs tracking-[0.3em] uppercase animate-pulse" style="color:rgba(26,46,64,0.5)"
            x-show="state==='spinning'">
             ● &nbsp; Sedang Mengacak…
         </p>
@@ -308,7 +361,7 @@
 
     {{-- ══ WINNER ══ — layout centered, nama tidak terpotong --}}
     <div x-show="!isMulti && state==='winner'" x-cloak
-         class="win-pop w-full h-full flex flex-col items-center justify-center gap-4 px-12 text-center">
+         class="win-pop w-full h-full flex flex-col items-center justify-center gap-4 px-12 text-center relative">
 
         {{-- Badge tipe --}}
         <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest border"
@@ -320,21 +373,21 @@
         <template x-if="doorprize?.gambar">
             <img :src="doorprize.gambar"
                  class="object-contain rounded-2xl img-appear"
-                 style="height:22vh; max-width:30vw; border:2px solid rgba(123,145,161,0.2); background:rgba(255,255,255,0.04); padding:10px;"
+                 style="height:22vh; max-width:30vw; border:2px solid rgba(36,76,107,0.15); background:rgba(255,255,255,0.65); padding:10px; box-shadow:0 4px 20px rgba(36,76,107,0.1);"
                  alt="Hadiah">
         </template>
 
         {{-- NPK --}}
-        <p class="font-mono tracking-[0.18em]" style="color:rgba(123,145,161,0.5); font-size:1.1rem"
+        <p class="font-mono tracking-[0.18em]" style="color:rgba(26,46,64,0.55); font-size:1.1rem"
            x-text="winner?.npk"></p>
 
         {{-- NAMA — penuh, tidak terpotong, auto wrap jika panjang --}}
-        <p class="font-black text-white leading-tight"
+        <p class="font-black text-gray-800 leading-tight"
            style="font-size:clamp(2.2rem,5.5vw,5rem); word-break:break-word; overflow-wrap:anywhere; max-width:90vw"
            x-text="winner?.nama"></p>
 
         {{-- SubCo --}}
-        <p style="color:#7B91A1; font-size:clamp(1rem,2vw,1.4rem)"
+        <p style="color:rgba(26,46,64,0.65); font-size:clamp(1rem,2vw,1.4rem)"
            x-text="winner?.subco"></p>
 
         {{-- Hadiah badge --}}
@@ -348,17 +401,17 @@
     </div>
 
     {{-- ══ MULTI-SPIN — banyak kolom sekaligus ══ --}}
-    <div x-show="isMulti" x-cloak class="w-full h-full flex flex-col items-center gap-3 px-6 py-3 overflow-hidden">
+    <div x-show="isMulti" x-cloak class="w-full h-full flex flex-col items-center gap-3 px-6 py-3 overflow-hidden relative">
 
         {{-- Banner --}}
         <template x-if="multiBanner">
             <img :src="multiBanner" class="rounded-2xl object-contain img-appear shrink-0"
-                 style="max-height:18vh; max-width:60vw; border:2px solid rgba(123,145,161,0.2); background:rgba(255,255,255,0.04); padding:8px;"
+                 style="max-height:18vh; max-width:60vw; border:2px solid rgba(36,76,107,0.15); background:rgba(255,255,255,0.65); padding:8px;"
                  alt="Banner">
         </template>
 
-        <p class="font-black uppercase tracking-[0.25em] text-center shrink-0"
-           style="font-size:clamp(1.2rem,2.4vw,2rem); color:#a78bfa">
+        <p class="font-black uppercase tracking-[0.25em] text-center shrink-0 text-gray-800"
+           style="font-size:clamp(1.2rem,2.4vw,2rem)">
         SPIN DOORPRIZE <span x-text="multiSlots.filter(s => s.state === 'winner').length"></span> / <span x-text="multiSlots.length"></span> KONVENSI IMPROVEMENT DHARMA 31
         </p>
 
@@ -410,8 +463,9 @@
 </main>
 
 {{-- ── FOOTER ── --}}
-<footer class="shrink-0 text-center py-2.5 border-t" style="border-color:rgba(64,100,126,0.2)">
-    <p class="text-xs tracking-widest uppercase" style="color:rgba(123,145,161,0.3)">
+<footer class="shrink-0 text-center py-2.5 border-t"
+        style="border-color:rgba(64,100,126,0.25); background:rgba(13,30,45,0.5); backdrop-filter:blur(8px);">
+    <p class="text-xs tracking-widest uppercase" style="color:rgba(255,255,255,0.45)">
         {{ $event?->nama ?? 'Konvensi Improvement Dharma' }} · Dharma Group
     </p>
 </footer>
@@ -497,31 +551,31 @@ function displayApp() {
 
         typeThemes: {
             doorprize: {
-                labelClass: 'text-blue-400', label: '🎁 DOORPRIZE', emptyEmoji: '🎁',
+                labelClass: 'text-blue-700', label: '🎁 DOORPRIZE', emptyEmoji: '🎁',
                 drumGlow: 'rgba(64,100,126,0.13)',
                 borderColor: 'rgba(96,165,250,0.35)',
                 digitColor: '#60a5fa',
-                badgeClass: 'bg-green-500/15 border-green-500/40 text-green-300', badgeText: '🎉  SELAMAT!',
-                prizeBadgeClass: 'bg-blue-500/10 border-blue-500/20', prizeTextClass: 'text-blue-300',
-                bgClass: 'bg-winner',
+                badgeClass: 'bg-green-100 border-green-300 text-green-700 shadow-md', badgeText: '🎉  SELAMAT!',
+                prizeBadgeClass: 'bg-white border-blue-200 shadow-md', prizeTextClass: 'text-blue-700',
+                bgClass: 'mood-winner',
             },
             doorprize_utama: {
-                labelClass: 'text-slate-300', label: '🥈 DOORPRIZE UTAMA', emptyEmoji: '🥈',
+                labelClass: 'text-slate-700', label: '🥈 DOORPRIZE UTAMA', emptyEmoji: '🥈',
                 drumGlow: 'rgba(148,163,184,0.16)',
                 borderColor: 'rgba(148,163,184,0.35)',
                 digitColor: '#94a3b8',
-                badgeClass: 'bg-slate-400/15 border-slate-400/40 text-slate-200', badgeText: '🥈  DOORPRIZE UTAMA WINNER!',
-                prizeBadgeClass: 'bg-slate-400/10 border-slate-400/30', prizeTextClass: 'text-slate-200',
-                bgClass: 'bg-winner-utama',
+                badgeClass: 'bg-slate-200 border-slate-300 text-slate-700 shadow-md', badgeText: '🥈  DOORPRIZE UTAMA WINNER!',
+                prizeBadgeClass: 'bg-white border-slate-200 shadow-md', prizeTextClass: 'text-slate-700',
+                bgClass: 'mood-winner-utama',
             },
             grand_prize: {
-                labelClass: 'text-yellow-400', label: '🏆 GRAND PRIZE', emptyEmoji: '🏆',
+                labelClass: 'text-amber-700', label: '🏆 GRAND PRIZE', emptyEmoji: '🏆',
                 drumGlow: 'rgba(234,179,8,0.1)',
                 borderColor: 'rgba(234,179,8,0.35)',
                 digitColor: '#fbbf24',
-                badgeClass: 'bg-yellow-500/15 border-yellow-500/40 text-yellow-300', badgeText: '🏆  GRAND PRIZE WINNER!',
-                prizeBadgeClass: 'bg-yellow-500/15 border-yellow-500/30', prizeTextClass: 'text-yellow-300',
-                bgClass: 'bg-winner-gp',
+                badgeClass: 'bg-amber-100 border-amber-300 text-amber-700 shadow-md', badgeText: '🏆  GRAND PRIZE WINNER!',
+                prizeBadgeClass: 'bg-white border-amber-200 shadow-md', prizeTextClass: 'text-amber-700',
+                bgClass: 'mood-winner-gp',
             },
         },
         typeTheme() { return this.typeThemes[this.doorprize?.type] ?? this.typeThemes.doorprize; },
@@ -696,13 +750,13 @@ function displayApp() {
 
         bgClass() {
             if (this.isMulti) {
-                if (this.state === 'spinning') return 'bg-spinning';
-                if (this.state === 'winner')   return 'bg-winner-utama';
-                return 'bg-idle';
+                if (this.state === 'spinning') return 'mood-spinning';
+                if (this.state === 'winner')   return 'mood-winner-utama';
+                return 'mood-idle';
             }
-            if (this.state === 'spinning' || this.state === 'settling') return 'bg-spinning';
+            if (this.state === 'spinning' || this.state === 'settling') return 'mood-spinning';
             if (this.state === 'winner') return this.typeTheme().bgClass;
-            return 'bg-idle';
+            return 'mood-idle';
         },
     }
 }
