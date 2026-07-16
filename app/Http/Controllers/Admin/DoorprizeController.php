@@ -37,7 +37,7 @@ class DoorprizeController extends Controller
     {
         $data = $request->validate([
             'nama_hadiah' => 'required|string',
-            'gambar'      => 'nullable|image|max:5120',
+            'gambar'      => 'nullable|image|max:20000',
             'jumlah'      => 'required|integer|min:1',
             'urutan'      => 'nullable|integer',
             'type'        => 'required|in:doorprize,doorprize_utama,grand_prize',
@@ -47,7 +47,7 @@ class DoorprizeController extends Controller
         $data['event_id'] = $event->id;
 
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('doorprizes', 'public');
+            $data['gambar'] = $this->resizeAndStoreImage($request->file('gambar'));
         }
 
         Doorprize::create($data);
@@ -63,7 +63,7 @@ class DoorprizeController extends Controller
     {
         $data = $request->validate([
             'nama_hadiah' => 'required|string',
-            'gambar'      => 'nullable|image|max:5120',
+            'gambar'      => 'nullable|image|max:20000',
             'jumlah'      => 'required|integer|min:1',
             'urutan'      => 'nullable|integer',
             'type'        => 'required|in:doorprize,doorprize_utama,grand_prize',
@@ -71,11 +71,62 @@ class DoorprizeController extends Controller
 
         if ($request->hasFile('gambar')) {
             if ($doorprize->gambar) Storage::disk('public')->delete($doorprize->gambar);
-            $data['gambar'] = $request->file('gambar')->store('doorprizes', 'public');
+            $data['gambar'] = $this->resizeAndStoreImage($request->file('gambar'));
         }
 
         $doorprize->update($data);
         return redirect()->route('admin.doorprizes.index')->with('success', 'Hadiah berhasil diperbarui.');
+    }
+
+    /**
+     * Resize gambar hadiah supaya ukuran filenya kecil (max sisi terpanjang
+     * 1600px, kualitas 82%, selalu jadi JPEG) — supaya tidak masalah lagi
+     * dengan limit upload walau foto sumbernya besar (foto HP modern).
+     */
+    private function resizeAndStoreImage($file): string
+    {
+        $maxDimension = 1600;
+        $quality = 82;
+
+        $info = @getimagesize($file->getRealPath());
+        $type = $info[2] ?? null;
+
+        $source = match ($type) {
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($file->getRealPath()),
+            IMAGETYPE_PNG  => @imagecreatefrompng($file->getRealPath()),
+            IMAGETYPE_GIF  => @imagecreatefromgif($file->getRealPath()),
+            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($file->getRealPath()) : null,
+            default        => null,
+        };
+
+        // Format tidak dikenali GD — simpan apa adanya sebagai fallback
+        if (!$source) {
+            return $file->store('doorprizes', 'public');
+        }
+
+        $width  = imagesx($source);
+        $height = imagesy($source);
+        $ratio  = min(1, $maxDimension / max($width, $height));
+        $newWidth  = max(1, (int) round($width * $ratio));
+        $newHeight = max(1, (int) round($height * $ratio));
+
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        // Isi putih dulu (jaga-jaga kalau sumbernya PNG transparan — JPEG tidak support alpha)
+        $white = imagecolorallocate($resized, 255, 255, 255);
+        imagefilledrectangle($resized, 0, 0, $newWidth, $newHeight, $white);
+        imagecopyresampled($resized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        $filename = 'doorprizes/' . Str::random(32) . '.jpg';
+        $tmpPath  = tempnam(sys_get_temp_dir(), 'img') . '.jpg';
+        imagejpeg($resized, $tmpPath, $quality);
+
+        imagedestroy($source);
+        imagedestroy($resized);
+
+        Storage::disk('public')->put($filename, file_get_contents($tmpPath));
+        @unlink($tmpPath);
+
+        return $filename;
     }
 
     public function destroy(Doorprize $doorprize)

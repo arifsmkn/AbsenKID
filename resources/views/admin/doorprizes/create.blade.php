@@ -3,7 +3,8 @@
 @section('page-title', 'Tambah Hadiah Doorprize')
 @section('content')
 <div class="max-w-lg">
-    <form method="POST" action="{{ route('admin.doorprizes.store') }}" enctype="multipart/form-data" class="card space-y-4">
+    <form method="POST" action="{{ route('admin.doorprizes.store') }}" enctype="multipart/form-data" class="card space-y-4"
+          onsubmit="const btn=this.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='⏳ Menyimpan...';">
         @csrf
 
         {{-- Tipe --}}
@@ -63,7 +64,7 @@
         </div>
 
         <div class="flex gap-2 pt-2">
-            <button class="btn-primary">Simpan</button>
+            <button type="submit" class="btn-primary">Simpan</button>
             <a href="{{ route('admin.doorprizes.index') }}" class="btn-secondary">Batal</a>
         </div>
     </form>

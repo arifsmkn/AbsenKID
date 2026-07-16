@@ -107,11 +107,18 @@ $typeMeta = [
         </div>
         <div class="flex items-center gap-2">
             <span class="text-xs" style="color:#7B91A1">Tampilan layar:</span>
-            <a href="{{ $displayUrl }}" target="_blank"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
-               style="background:#D03F42">
+            <button type="button"
+                    @click.prevent="window.open('{{ $displayUrl }}', 'doorprizeDisplay')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
+                    style="background:#D03F42">
                 📺 Buka Display
-            </a>
+            </button>
+            <button type="button" @click="resetDisplayScreen()" :disabled="resettingDisplay"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
+                    style="background:rgba(123,145,161,0.15); color:#7B91A1; border:1px solid rgba(123,145,161,0.3)">
+                <span x-show="!resettingDisplay">🔄 Reset Layar</span>
+                <span x-show="resettingDisplay" x-cloak>⏳...</span>
+            </button>
         </div>
     </div>
 
@@ -787,6 +794,7 @@ function spinApp() {
         saving: false,
         saved: false,
         disqualifying: false,
+        resettingDisplay: false,
         excludedJabatan: [],
         selectedSubcos: [],
         allJabatan: @json($jabatanList),
@@ -1220,6 +1228,22 @@ function spinApp() {
                 this.winnerIndex = 0;
                 this.resetSpin();
                 this.syncDisplay('reset');
+            }
+        },
+
+        async resetDisplayScreen() {
+            if (this.resettingDisplay) return;
+            if (!confirm('Reset layar TV ke idle? Ini cuma reset tampilan, tidak menghapus data pemenang yang sudah tersimpan.')) return;
+            this.resettingDisplay = true;
+            try {
+                await fetch('{{ route('admin.doorprizes.resetDisplay') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: '{}'
+                });
+                this.resetAll();
+            } finally {
+                this.resettingDisplay = false;
             }
         },
 

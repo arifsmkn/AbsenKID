@@ -296,35 +296,34 @@
 
     {{-- ══ IDLE ══ --}}
     <div x-show="!isMulti && state==='idle'" class="text-center relative">
-        <div class="text-8xl mb-6 opacity-20">🎲</div>
         <p class="text-2xl font-light tracking-widest uppercase" style="color:rgba(26,46,64,0.55)">Menunggu Undian…</p>
     </div>
 
     {{-- ══ SPINNING / SETTLING ══ --}}
     <div x-show="!isMulti && (state==='spinning' || state==='settling')" x-cloak
-         class="w-full h-full flex flex-col items-center justify-center gap-3 px-8 py-4 relative">
+         class="w-full h-full flex flex-col items-center justify-center gap-3 px-8 py-4 relative"
+         style="transform: translateY(-4vh)">
 
         {{-- 1. LABEL DOORPRIZE / GRAND PRIZE --}}
         <p class="font-black uppercase tracking-[0.25em] leading-none text-center"
-           :class="typeTheme().labelClass"
-           style="font-size:clamp(1.6rem,3vw,2.8rem)"
+           :style="'font-size:clamp(1.6rem,3vw,2.8rem); ' + typeTheme().labelStyle"
            x-text="typeTheme().label"></p>
 
         {{-- 2. GAMBAR HADIAH --}}
-        <div class="flex items-center justify-center" style="height:20vh">
+        <div class="flex items-center justify-center" style="height:37vh">
             <template x-if="doorprize?.gambar">
                 <img :src="doorprize.gambar" class="h-full w-auto object-contain rounded-2xl img-appear"
-                     style="max-width:32vw; border:2px solid rgba(36,76,107,0.15); background:rgba(255,255,255,0.65); padding:10px; box-shadow:0 4px 20px rgba(36,76,107,0.1);"
+                     style="max-width:53vw; border:2px solid rgba(36,76,107,0.15); background:rgba(255,255,255,0.65); padding:10px; box-shadow:0 4px 20px rgba(36,76,107,0.1);"
                      alt="Hadiah">
             </template>
             <template x-if="!doorprize?.gambar">
-                <div class="text-9xl opacity-30" x-text="typeTheme().emptyEmoji"></div>
+                <div class="text-9xl" style="opacity:0.3" x-text="typeTheme().emptyEmoji"></div>
             </template>
         </div>
 
         {{-- 3. NAMA HADIAH --}}
         <p class="font-black text-gray-800 text-center leading-none"
-           style="font-size:clamp(2.8rem,6vw,6rem)"
+           style="font-size:clamp(2.2rem,4.8vw,4.8rem)"
            x-text="doorprize?.nama ?? '—'"></p>
 
         {{-- Divider --}}
@@ -365,7 +364,7 @@
 
         {{-- Badge tipe --}}
         <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest border"
-             :class="typeTheme().badgeClass"
+             :style="typeTheme().badgeStyle"
              x-text="typeTheme().badgeText">
         </div>
 
@@ -375,6 +374,9 @@
                  class="object-contain rounded-2xl img-appear"
                  style="height:22vh; max-width:30vw; border:2px solid rgba(36,76,107,0.15); background:rgba(255,255,255,0.65); padding:10px; box-shadow:0 4px 20px rgba(36,76,107,0.1);"
                  alt="Hadiah">
+        </template>
+        <template x-if="!doorprize?.gambar">
+            <div class="text-8xl" style="opacity:0.3" x-text="typeTheme().emptyEmoji"></div>
         </template>
 
         {{-- NPK --}}
@@ -391,11 +393,10 @@
            x-text="winner?.subco"></p>
 
         {{-- Hadiah badge --}}
-        <div class="inline-flex items-center gap-3 px-6 py-2.5 rounded-2xl border" :class="typeTheme().prizeBadgeClass">
+        <div class="inline-flex items-center gap-3 px-6 py-2.5 rounded-2xl border" :style="typeTheme().prizeBadgeStyle">
             <span class="text-2xl" x-text="typeTheme().emptyEmoji"></span>
             <span class="font-bold"
-                  style="font-size:clamp(1.2rem,2.5vw,2rem)"
-                  :class="typeTheme().prizeTextClass"
+                  :style="'font-size:clamp(1.2rem,2.5vw,2rem); ' + typeTheme().prizeTextStyle"
                   x-text="winner?.hadiah"></span>
         </div>
     </div>
@@ -551,30 +552,30 @@ function displayApp() {
 
         typeThemes: {
             doorprize: {
-                labelClass: 'text-blue-700', label: '🎁 DOORPRIZE', emptyEmoji: '🎁',
+                labelStyle: 'color:#1d4ed8', label: 'DOORPRIZE', emptyEmoji: '',
                 drumGlow: 'rgba(64,100,126,0.13)',
                 borderColor: 'rgba(96,165,250,0.35)',
                 digitColor: '#60a5fa',
-                badgeClass: 'bg-green-100 border-green-300 text-green-700 shadow-md', badgeText: '🎉  SELAMAT!',
-                prizeBadgeClass: 'bg-white border-blue-200 shadow-md', prizeTextClass: 'text-blue-700',
+                badgeStyle: 'background:#dcfce7;border-color:#86efac;color:#15803d', badgeText: 'SELAMAT!',
+                prizeBadgeStyle: 'background:#ffffff;border-color:#bfdbfe', prizeTextStyle: 'color:#1d4ed8',
                 bgClass: 'mood-winner',
             },
             doorprize_utama: {
-                labelClass: 'text-slate-700', label: '🥈 DOORPRIZE UTAMA', emptyEmoji: '🥈',
+                labelStyle: 'color:#334155', label: 'DOORPRIZE UTAMA', emptyEmoji: '',
                 drumGlow: 'rgba(148,163,184,0.16)',
                 borderColor: 'rgba(148,163,184,0.35)',
                 digitColor: '#94a3b8',
-                badgeClass: 'bg-slate-200 border-slate-300 text-slate-700 shadow-md', badgeText: '🥈  DOORPRIZE UTAMA WINNER!',
-                prizeBadgeClass: 'bg-white border-slate-200 shadow-md', prizeTextClass: 'text-slate-700',
+                badgeStyle: 'background:#e2e8f0;border-color:#cbd5e1;color:#334155', badgeText: 'DOORPRIZE UTAMA WINNER!',
+                prizeBadgeStyle: 'background:#ffffff;border-color:#e2e8f0', prizeTextStyle: 'color:#334155',
                 bgClass: 'mood-winner-utama',
             },
             grand_prize: {
-                labelClass: 'text-amber-700', label: '🏆 GRAND PRIZE', emptyEmoji: '🏆',
+                labelStyle: 'color:#b45309', label: 'GRAND PRIZE', emptyEmoji: '',
                 drumGlow: 'rgba(234,179,8,0.1)',
                 borderColor: 'rgba(234,179,8,0.35)',
                 digitColor: '#fbbf24',
-                badgeClass: 'bg-amber-100 border-amber-300 text-amber-700 shadow-md', badgeText: '🏆  GRAND PRIZE WINNER!',
-                prizeBadgeClass: 'bg-white border-amber-200 shadow-md', prizeTextClass: 'text-amber-700',
+                badgeStyle: 'background:#fef3c7;border-color:#fcd34d;color:#b45309', badgeText: 'GRAND PRIZE WINNER!',
+                prizeBadgeStyle: 'background:#ffffff;border-color:#fde68a', prizeTextStyle: 'color:#b45309',
                 bgClass: 'mood-winner-gp',
             },
         },
