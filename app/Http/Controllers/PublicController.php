@@ -70,7 +70,7 @@ class PublicController extends Controller
                 'total' => $invBySubco[$subco],
                 'pct'   => round((($hadirBySubco[$subco] ?? 0) / $invBySubco[$subco]) * 100),
             ])
-            ->sortByDesc('hadir')
+            ->sortByDesc('total')
             ->values();
 
         return response()->json(compact('totalInvited', 'totalAttended', 'recent', 'bySubco'));
