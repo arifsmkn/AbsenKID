@@ -46,34 +46,33 @@
 <div class="max-w-5xl mx-auto px-4 py-6">
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="grid grid-cols-3 gap-4 mb-8">
         <div class="rounded-2xl p-5 text-center flex flex-col items-center justify-center bg-white"
              style="border:1px solid rgba(36,76,107,0.12)">
-            <p class="text-5xl font-black" style="color:#22c55e" x-text="data.totalAttended ?? 0"></p>
+            <p class="text-3xl font-black" style="color:#22c55e" x-text="data.totalAttended ?? 0"></p>
             <p class="text-gray-500 text-sm mt-1">Hadir Scan QR</p>
         </div>
-        <div class="flex flex-col gap-4">
-            <div class="rounded-2xl p-4 text-center bg-white" style="border:1px solid rgba(36,76,107,0.12)">
-                <p class="text-3xl font-black" style="color:#244C6B" x-text="data.totalInvited ?? 0"></p>
-                <p class="text-gray-500 text-sm mt-1">Total Undangan</p>
-            </div>
-            <div class="rounded-2xl p-4 text-center bg-white" style="border:1px solid rgba(36,76,107,0.12)">
-                <p class="text-3xl font-black" :style="pctColor"
-                   x-text="data.totalInvited > 0 ? Math.round((data.totalAttended/data.totalInvited)*100) + '%' : '0%'"></p>
-                <p class="text-gray-500 text-sm mt-1">Persentase</p>
-            </div>
+        <div class="rounded-2xl p-5 text-center flex flex-col items-center justify-center bg-white"
+             style="border:1px solid rgba(36,76,107,0.12)">
+            <p class="text-3xl font-black" style="color:#244C6B" x-text="data.totalInvited ?? 0"></p>
+            <p class="text-gray-500 text-sm mt-1">Total Undangan</p>
+        </div>
+        <div class="rounded-2xl p-5 text-center flex flex-col items-center justify-center bg-white"
+             style="border:1px solid rgba(36,76,107,0.12)">
+            <p class="text-3xl font-black" :style="pctColor"
+               x-text="data.totalInvited > 0 ? Math.round((data.totalAttended/data.totalInvited)*100) + '%' : '0%'"></p>
+            <p class="text-gray-500 text-sm mt-1">Persentase</p>
         </div>
     </div>
 
     {{-- Judul Grafik --}}
     <div class="text-center mb-4">
-        <img src="{{ asset('images/dharma-group.png') }}" class="h-10 w-auto object-contain mx-auto mb-2" alt="">
         <h5 class="font-bold text-lg" style="color:#244C6B">Grafik Kehadiran Peserta Konvensi Improvement Dharma 31</h5>
     </div>
 
     {{-- Grafik per SubCo --}}
     <div class="rounded-2xl p-4 mb-4 bg-white" style="border:1px solid rgba(36,76,107,0.12)">
-        <div class="relative" :style="'height:' + Math.max(180, (data.bySubco?.length || 0) * 38) + 'px'">
+        <div class="relative" :style="'height:' + Math.max(260, (data.bySubco?.length || 0) * 56) + 'px'">
             <canvas id="subco-chart"></canvas>
         </div>
         <template x-if="!data.bySubco?.length">
@@ -105,13 +104,12 @@ function liveAbsensi() {
             const labels = subco.map(s => s.subco || '(Lainnya)');
             const hadir  = subco.map(s => s.hadir);
             const total  = subco.map(s => s.total);
-            const pct    = subco.map(s => s.pct);
 
             if (this.chart) {
                 this.chart.data.labels = labels;
                 this.chart.data.datasets[0].data = hadir;
                 this.chart.data.datasets[1].data = total;
-                this.chart.options.plugins.datalabels._pct = pct;
+                this.chart.options.plugins.datalabels._total = total;
                 this.chart.update();
                 return;
             }
@@ -122,8 +120,8 @@ function liveAbsensi() {
                 data: {
                     labels,
                     datasets: [
-                        { label: 'Hadir', data: hadir, backgroundColor: '#22c55e', borderRadius: 6, maxBarThickness: 18 },
-                        { label: 'Total Undangan', data: total, backgroundColor: 'rgba(36,76,107,0.18)', borderRadius: 6, maxBarThickness: 18, datalabels: { display: false } },
+                        { label: 'Hadir', data: hadir, backgroundColor: '#22c55e', borderRadius: 6, maxBarThickness: 28 },
+                        { label: 'Total Undangan', data: total, backgroundColor: 'rgba(36,76,107,0.18)', borderRadius: 6, maxBarThickness: 28, datalabels: { display: false } },
                     ]
                 },
                 options: {
@@ -132,19 +130,19 @@ function liveAbsensi() {
                     maintainAspectRatio: false,
                     layout: { padding: { right: 36 } },
                     plugins: {
-                        legend: { labels: { color: '#244C6B' } },
+                        legend: { labels: { color: '#244C6B', font: { weight: 'bold' } } },
                         datalabels: {
-                            _pct: pct,
-                            anchor: 'end',
-                            align: 'end',
-                            color: '#16a34a',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (value, ctx) => (ctx.chart.options.plugins.datalabels._pct?.[ctx.dataIndex] ?? 0) + '%',
+                            _total: total,
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 12 },
+                            formatter: (value, ctx) => value + '/' + (ctx.chart.options.plugins.datalabels._total?.[ctx.dataIndex] ?? 0),
                         },
                     },
                     scales: {
                         x: { beginAtZero: true, ticks: { color: '#7B91A1' }, grid: { color: 'rgba(36,76,107,0.06)' } },
-                        y: { ticks: { color: '#244C6B' }, grid: { display: false } },
+                        y: { ticks: { color: '#244C6B', font: { weight: 'bold' } }, grid: { display: false } },
                     },
                 }
             });
