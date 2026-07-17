@@ -51,18 +51,14 @@
                     <p class="text-blue-300/70 text-sm">{{ $employee->npk }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="grid grid-cols-1 gap-3 text-sm">
                 <div class="rounded-lg p-3" style="background:rgba(255,255,255,0.05)">
                     <p class="text-blue-300/60 text-xs">SubCo</p>
                     <p class="font-semibold truncate">{{ $employee->subco }}</p>
                 </div>
-                <div class="rounded-lg p-3" style="background:rgba(255,255,255,0.05)">
-                    <p class="text-blue-300/60 text-xs">Jabatan</p>
-                    <p class="font-semibold truncate">{{ $employee->jabatan }}</p>
-                </div>
             </div>
             <div class="rounded-lg p-3 text-sm text-green-300 text-center" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25)">
-                🕐 Check-in: {{ now()->format('H:i:s') }} WIB
+                🕐 Check-in: {{ now()->timezone('Asia/Jakarta')->format('H:i:s') }} WIB
             </div>
         </div>
         <p class="text-xs text-white/30 mb-2" id="countdown-text">Kembali ke layar scan dalam 3 detik...</p>
