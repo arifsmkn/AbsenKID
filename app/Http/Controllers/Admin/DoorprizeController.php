@@ -301,6 +301,36 @@ class DoorprizeController extends Controller
         return view('admin.doorprizes.winners', compact('winners', 'event'));
     }
 
+    /** Export daftar pemenang doorprize event aktif ke Excel */
+    public function exportWinners()
+    {
+        $event = Event::where('is_active', true)->first();
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\DoorprizeWinnersExport($event?->id ?? 0),
+            'pemenang-doorprize-' . date('Ymd') . '.xlsx'
+        );
+    }
+
+    /** Admin: cek apakah suatu NPK menang doorprize (staff only, untuk verifikasi klaim hadiah) */
+    public function cek(Request $request)
+    {
+        $event    = Event::where('is_active', true)->first();
+        $employee = null;
+        $winner   = null;
+
+        if ($request->filled('npk')) {
+            $employee = Employee::find(trim($request->npk));
+            if ($employee && $event) {
+                $winner = DoorprizeWinner::with('doorprize')
+                    ->where('event_id', $event->id)
+                    ->where('employee_npk', $employee->npk)
+                    ->first();
+            }
+        }
+
+        return view('admin.doorprizes.cek', compact('event', 'employee', 'winner'));
+    }
+
     /** Hapus satu pemenang */
     public function destroyWinner(DoorprizeWinner $winner)
     {

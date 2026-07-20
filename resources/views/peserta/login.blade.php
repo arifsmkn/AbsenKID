@@ -118,17 +118,7 @@
             </button>
         </form>
 
-        {{-- Cek Doorprize --}}
-        <div class="mt-5 pt-4 border-t border-white/10">
-            <a href="{{ route('peserta.cek-doorprize') }}"
-               class="flex items-center justify-center gap-2 w-full py-2.5 font-bold rounded-xl transition-all text-sm"
-               style="background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; box-shadow:0 4px 14px rgba(239,68,68,0.45);">
-                🎁 Cek Hasil Doorprize
-            </a>
-            <p class="text-white/30 text-xs text-center mt-2">Cek apakah kamu menang doorprize tanpa login</p>
-        </div>
-
-        <div class="mt-3 text-center">
+        <div class="mt-5 pt-4 border-t border-white/10 text-center">
             <p class="text-white/40 text-xs">Masalah login? Hubungi panitia</p>
         </div>
     </div>

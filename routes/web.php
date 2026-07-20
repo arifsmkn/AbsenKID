@@ -54,7 +54,6 @@ Route::prefix('peserta')->name('peserta.')->group(function () {
     Route::get('login',  [PesertaAuth::class, 'showLogin'])->name('login');
     Route::post('login', [PesertaAuth::class, 'login'])->name('login.post');
     Route::post('logout',[PesertaAuth::class, 'logout'])->name('logout');
-    Route::get('cek-doorprize', [PesertaAuth::class, 'cekDoorprize'])->name('cek-doorprize');
 
     Route::middleware('peserta')->group(function () {
         Route::get('dashboard',         [PesertaDashboard::class, 'index'])->name('dashboard');
@@ -113,6 +112,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,user'])-
     Route::post('doorprize/draw', [DoorprizeController::class, 'draw'])->name('doorprizes.draw');
     Route::post('doorprize/save-winner', [DoorprizeController::class, 'saveWinner'])->name('doorprizes.saveWinner');
     Route::get('doorprize/winners', [DoorprizeController::class, 'winners'])->name('doorprizes.winners');
+    Route::get('doorprize/winners/export', [DoorprizeController::class, 'exportWinners'])->name('doorprizes.exportWinners');
+    Route::get('doorprize/cek', [DoorprizeController::class, 'cek'])->name('doorprizes.cek');
     Route::post('doorprize/start-display', [DoorprizeController::class, 'startDisplay'])->name('doorprizes.startDisplay');
     Route::post('doorprize/stop-display', [DoorprizeController::class, 'stopDisplay'])->name('doorprizes.stopDisplay');
     Route::post('doorprize/reset-display', [DoorprizeController::class, 'resetDisplay'])->name('doorprizes.resetDisplay');

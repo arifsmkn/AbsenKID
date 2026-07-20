@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Peserta;
 
 use App\Http\Controllers\Controller;
-use App\Models\DoorprizeWinner;
 use App\Models\Employee;
 use App\Models\Event;
 use App\Models\Subco;
@@ -63,24 +62,5 @@ class AuthController extends Controller
     {
         $request->session()->forget(['peserta_npk', 'peserta_nama', 'peserta_subco']);
         return redirect()->route('peserta.login');
-    }
-
-    public function cekDoorprize(Request $request)
-    {
-        $event    = Event::where('is_active', true)->first();
-        $employee = null;
-        $winner   = null;
-
-        if ($request->filled('npk')) {
-            $employee = Employee::find(trim($request->npk));
-            if ($employee && $event) {
-                $winner = DoorprizeWinner::with('doorprize')
-                    ->where('event_id', $event->id)
-                    ->where('employee_npk', $employee->npk)
-                    ->first();
-            }
-        }
-
-        return view('peserta.cek-doorprize', compact('event', 'employee', 'winner'));
     }
 }

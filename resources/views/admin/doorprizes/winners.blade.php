@@ -2,7 +2,9 @@
 @section('title', 'Pemenang Doorprize')
 @section('page-title', 'History Pemenang Doorprize')
 @section('content')
-<div class="flex justify-end mb-4">
+<div class="flex justify-end gap-2 mb-4">
+    <a href="{{ route('admin.doorprizes.cek') }}" class="btn-secondary">🔍 Cek Doorprize</a>
+    <a href="{{ route('admin.doorprizes.exportWinners') }}" class="btn-secondary">📤 Export Excel</a>
     <a href="{{ route('admin.doorprizes.spin') }}" class="btn-primary">🎲 Kocok Doorprize</a>
 </div>
 <div class="card overflow-hidden p-0">
